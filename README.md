@@ -24,7 +24,7 @@ I am an aspiring Offensive Security Engineer with a passion for breaking systems
 
 ---
 
-## 🛠️ Technical Skills
+## 🛠️ Technical Skills To Learn
 
 ### 🔍 Reconnaissance & Enumeration
 - **Nmap** | **Wireshark** | **Burp Suite** | **Recon-ng** | **Netdiscover**
