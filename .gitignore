@@ -1,0 +1,30 @@
+# .gitignore
+
+# System files
+.DS_Store
+Thumbs.db
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# Browser cache
+*.bak
+*.backup
+
+# Node modules (if used for any build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS specific
+.Spotlight-V100
+.Trashes
+ehthumbs.db

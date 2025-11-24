@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 
+    FLAG{HTML_INSPECT0R_G3T_R3KT} 
+    Congratulations, you found the first flag! 
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Harshith-OS | Red Team Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE VARIABLES (Default Red) --- */
+        :root {
+            --neon-color: #ff003c;
+            --neon-dim: #80001e;
+            --bg-dark: #050505;
+            --bg-panel: rgba(10, 10, 10, 0.95);
+            --text-main: #e0e0e0;
+            --font-mono: 'Fira Code', monospace;
+            --glass-border: 1px solid rgba(255, 0, 60, 0.3);
+            --term-prompt: #ff003c;
+            --taskbar-height: 40px;
+        }
+
+        /* --- THEMES --- */
+        [data-theme="green"] {
+            --neon-color: #00ff41;
+            --neon-dim: #003b00;
+            --glass-border: 1px solid rgba(0, 255, 65, 0.3);
+            --term-prompt: #00ff41;
+        }
+
+        [data-theme="blue"] {
+            --neon-color: #00e5ff;
+            --neon-dim: #004d55;
+            --glass-border: 1px solid rgba(0, 229, 255, 0.3);
+            --term-prompt: #00e5ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: default;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-color) var(--bg-dark);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            transition: color 0.5s ease;
+        }
+
+        /* --- VISUAL EFFECTS --- */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0; z-index: -1; opacity: 0.15; 
+        }
+
+        /* Glitch Animation */
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 var(--neon-color), -2px 0 #00ffff; }
+            25% { text-shadow: -2px 0 var(--neon-color), 2px 0 #00ffff; }
+            50% { text-shadow: -2px 0 #00ffff, 2px 0 var(--neon-color); }
+            75% { text-shadow: 2px 0 #00ffff, -2px 0 var(--neon-color); }
+            100% { text-shadow: 2px 0 var(--neon-color), -2px 0 #00ffff; }
+        }
+
+        .glitch-text:hover {
+            animation: glitch 0.3s infinite;
+        }
+
+        /* Blink Animation */
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* --- BOOTLOADER --- */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 10000;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--neon-color);
+        }
+        .log-line { margin-bottom: 5px; text-shadow: 0 0 5px var(--neon-color); font-weight: bold;}
+
+        /* --- DESKTOP --- */
+        #desktop {
+            position: relative; width: 100%; height: calc(100vh - var(--taskbar-height));
+            padding: 20px;
+            display: flex; flex-direction: column; align-items: flex-start;
+            flex-wrap: wrap; gap: 20px;
+            opacity: 0; transition: opacity 1s;
+        }
+
+        .desktop-icon {
+            width: 100px; text-align: center; cursor: pointer; padding: 10px;
+            border: 1px solid transparent; transition: 0.3s; color: var(--neon-color);
+        }
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.05); border: var(--glass-border);
+            text-shadow: 0 0 8px var(--neon-color);
+            transform: translateY(-2px);
+        }
+        .desktop-icon i { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .desktop-icon span { font-size: 0.8rem; font-weight: bold; }
+
+        /* --- TASKBAR --- */
+        #taskbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--taskbar-height);
+            background: rgba(5, 5, 5, 0.95);
+            border-top: 1px solid #333;
+            display: flex; align-items: center; padding: 0 10px;
+            z-index: 9000;
+            opacity: 0; transition: opacity 1s;
+        }
+        .start-btn {
+            color: var(--neon-color); font-weight: bold; padding: 0 15px; cursor: pointer;
+            border-right: 1px solid #333; margin-right: 10px; height: 100%;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .start-btn:hover { background: rgba(255, 255, 255, 0.1); text-shadow: 0 0 5px var(--neon-color); }
+        
+        .task-item {
+            padding: 0 15px; height: 80%; display: flex; align-items: center; gap: 8px;
+            background: #111; border: 1px solid #333; margin-right: 5px; cursor: pointer;
+            color: #aaa; font-size: 0.8rem; border-radius: 2px; transition: 0.2s;
+            max-width: 150px; overflow: hidden; white-space: nowrap;
+        }
+        .task-item:hover { background: #222; color: #fff; }
+        .task-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid var(--neon-color);
+            color: var(--neon-color);
+        }
+
+        /* --- WINDOW SYSTEM --- */
+        .window {
+            position: absolute; width: 600px; height: 400px;
+            background: var(--bg-panel); 
+            border: 1px solid #333; /* Default border */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: none; flex-direction: column; resize: both; overflow: hidden;
+            min-width: 300px; min-height: 200px; backdrop-filter: blur(5px);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            
+            /* State: Hidden */
+            opacity: 0; 
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        /* Open/Close Animations */
+        @keyframes openWindowAnim {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes closeWindowAnim {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.95); }
+        }
+
+        /* VISIBLE STATE */
+        .window.open {
+            display: flex;
+            opacity: 1 !important; /* Force visible */
+            transform: scale(1) !important;
+            pointer-events: auto;
+            animation: openWindowAnim 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        .window.closing {
+            display: flex;
+            animation: closeWindowAnim 0.15s ease-in forwards;
+        }
+
+        /* Active Window Styling */
+        .window.active-window {
+            border: 1px solid var(--neon-color);
+            box-shadow: 0 0 15px var(--neon-dim);
+            z-index: 100;
+        }
+
+        .window-header {
+            background: linear-gradient(90deg, rgba(20,20,20,0.9), #000);
+            padding: 8px 15px; display: flex; justify-content: space-between; align-items: center;
+            cursor: grab; border-bottom: 1px solid #333; user-select: none;
+        }
+        .window.active-window .window-header {
+            border-bottom: 1px solid var(--neon-color);
+        }
+
+        .window-header:active { cursor: grabbing; }
+
+        .window-title { font-weight: bold; color: var(--text-main); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .window.active-window .window-title { color: var(--neon-color); }
+
+        .window-controls span {
+            display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 5px; cursor: pointer;
+        }
+        .close-btn { background: #ff5f56; }
+        .min-btn { background: #ffbd2e; }
+        .max-btn { background: #27c93f; }
+
+        .window-body { flex: 1; padding: 15px; overflow-y: auto; color: #ccc; font-size: 0.9rem; position: relative; }
+        
+        /* Scrollbar */
+        .window-body::-webkit-scrollbar { width: 8px; }
+        .window-body::-webkit-scrollbar-thumb { background: var(--neon-color); border-radius: 4px; }
+        .window-body::-webkit-scrollbar-track { background: #1a1a1a; }
+
+        /* --- COMPONENT STYLES --- */
+        
+        /* Terminal */
+        #terminal-body { background-color: #0c0c0c; font-family: 'JetBrains Mono', monospace; padding: 10px; }
+        .command-line { display: flex; margin-top: 5px; }
+        .prompt { color: var(--term-prompt); margin-right: 10px; font-weight: bold;}
+        .command-input {
+            background: transparent; border: none; color: #fff;
+            font-family: inherit; font-size: inherit; flex: 1; outline: none;
+            caret-color: var(--neon-color);
+        }
+        .output { color: #ccc; margin-bottom: 8px; white-space: pre-wrap; line-height: 1.4; }
+        .ascii-art {
+            font-family: monospace; white-space: pre; color: var(--neon-color);
+            font-weight: bold; font-size: 8px; line-height: 8px;
+            margin-bottom: 20px; overflow-x: hidden;
+        }
+        
+        /* Skills - NO BEGINNER TAGS */
+        .skill-category { margin-bottom: 20px; }
+        .skill-category h3 { 
+            color: var(--neon-color); border-bottom: 1px dashed var(--neon-color); 
+            margin-bottom: 10px; padding-bottom: 5px; font-size: 1rem;
+        }
+        .skill-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px; border: 1px solid #333;
+            color: #ddd; font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .skill-tag:hover { border-color: var(--neon-color); color: var(--neon-color); }
+
+        /* Projects List - Refined */
+        .project-section-title {
+            color: var(--neon-color); font-size: 1.1rem; border-bottom: 2px solid #333;
+            margin-top: 20px; margin-bottom: 15px; padding-bottom: 5px;
+        }
+        .project-card {
+            border: 1px solid #333; padding: 12px; margin-bottom: 10px;
+            background: rgba(0,0,0,0.3); transition: 0.3s;
+        }
+        .project-card:hover { border-color: var(--neon-color); transform: translateX(5px); }
+        .project-title { color: #fff; font-weight: bold; display: flex; justify-content: space-between;}
+        .project-status { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
+        .status-completed { border: 1px solid #2ecc71; color: #2ecc71; }
+        .status-wip { border: 1px solid #f1c40f; color: #f1c40f; }
+        .project-desc { font-size: 0.8rem; color: #aaa; margin-top: 5px; }
+        
+        /* Certs */
+        .cert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cert-card {
+            border: 1px solid #333; padding: 15px; text-align: center; background: rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+        .cert-card:hover { border-color: var(--neon-color); box-shadow: 0 0 10px var(--neon-dim); }
+        .cert-card h3 { color: #eee; margin-bottom: 5px; font-size: 1.1rem; }
+        .cert-status { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .status-goal { color: var(--neon-color); animation: pulse 2s infinite; font-weight: bold; }
+        .status-planned { color: #888; border: 1px dashed #444; padding: 2px; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* CTF */
+        .ctf-stat { margin-bottom: 15px; }
+        .progress-bar { width: 100%; height: 8px; background: #222; margin-top: 5px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--neon-color); width: 0%; transition: width 1.5s ease-in-out; box-shadow: 0 0 10px var(--neon-color); }
+
+        /* Contact */
+        .contact-link {
+            display: flex; align-items: center; padding: 12px; margin-bottom: 10px;
+            border: 1px solid #333; text-decoration: none; color: var(--text-main); transition: 0.3s; cursor: pointer;
+        }
+        .contact-link:hover { border-color: var(--neon-color); background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .contact-link i { margin-right: 15px; color: var(--neon-color); width: 20px; text-align: center; font-size: 1.2rem;}
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            .window {
+                width: 94% !important; /* Not full width */
+                height: 75% !important; /* Not full height */
+                top: 10% !important;
+                left: 3% !important;
+                border: 1px solid #333 !important;
+                border-radius: 5px !important;
+            }
+            .window-header { cursor: default; } /* Disable drag */
+            #desktop { align-items: flex-start; justify-content: flex-start; padding: 10px; gap: 10px;}
+            .desktop-icon { width: 80px; transform: scale(0.9); }
+            .cert-grid { grid-template-columns: 1fr; }
+            .ascii-art { font-size: 6px; line-height: 6px; }
+            
+            /* Hide taskbar on very small screens if keyboard is open? No, keep it. */
+        }
+
+        @media (min-width: 769px) { .ascii-art { font-size: 12px; line-height: 12px; } }
+
+    </style>
+</head>
+<body data-theme="red">
+
+    <canvas id="matrix-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <!-- BOOT SCREEN -->
+    <div id="boot-screen">
+        <div id="boot-log"></div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="desktop">
+        <div class="desktop-icon" onclick="openWindow('terminal-window')"><i class="fas fa-terminal"></i><span>Terminal</span></div>
+        <div class="desktop-icon" onclick="openWindow('about-window')"><i class="fas fa-user-secret"></i><span>About</span></div>
+        <div class="desktop-icon" onclick="openWindow('skills-window')"><i class="fas fa-tools"></i><span>Skills</span></div>
+        <div class="desktop-icon" onclick="openWindow('projects-window')"><i class="fas fa-code-branch"></i><span>Projects</span></div>
+        <div class="desktop-icon" onclick="openWindow('certs-window')"><i class="fas fa-certificate"></i><span>Certs</span></div>
+        <div class="desktop-icon" onclick="openWindow('ctf-window')"><i class="fas fa-flag"></i><span>CTF Stats</span></div>
+        <div class="desktop-icon" onclick="openWindow('contact-window')"><i class="fas fa-address-card"></i><span>Contact</span></div>
+    </div>
+
+    <!-- TASKBAR -->
+    <div id="taskbar">
+        <div class="start-btn" onclick="openWindow('terminal-window')">
+            <i class="fas fa-biohazard"></i> START
+        </div>
+        <!-- Task items will be injected here via JS -->
+    </div>
+
+    <!-- WINDOWS -->
+
+    <!-- TERMINAL - RESIZED SMALLER -->
+    <div id="terminal-window" class="window" style="top: 10%; left: 10%; width: 600px; height: 450px;">
+        <div class="window-header">
+            <span class="window-title glitch-text">root@harshith-os:~</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('terminal-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('terminal-window')"></span>
+                <span class="close-btn" onclick="closeWindow('terminal-window')"></span>
+            </div>
+        </div>
+        <div class="window-body" id="terminal-body" onclick="document.getElementById('cmd-input').focus()">
+<div class="ascii-art glitch-text">
+  _   _    _    ____  ____  _   _ ___ _____ _   _ 
+ | | | |  / \  |  _ \/ ___|| | | |_ _|_   _| | | |
+ | |_| | / _ \ | |_) \___ \| |_| || |  | | | |_| |
+ |  _  |/ ___ \|  _ < ___) |  _  || |  | | |  _  |
+ |_| |_/_/   \_\_| \_\____/|_| |_|___| |_| |_| |_|
+</div>
+            <div class="output">Welcome to Harshith-OS v3.1 (Kernel 5.15.0-generic)</div>
+            <div class="output">Type 'help' to see available commands.</div>
+            <div class="output" style="color: #666;">[TIP] Try 'hack nasa' or 'cat roadmap.txt'</div>
+            <div id="terminal-output"></div>
+            <div class="command-line">
+                <span class="prompt">root@harshith-os:~#</span>
+                <input type="text" class="command-input" id="cmd-input" autocomplete="off" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div id="about-window" class="window" style="top: 80px; left: 100px;">
+        <div class="window-header">
+            <span class="window-title">cat about.txt</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('about-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('about-window')"></span>
+                <span class="close-btn" onclick="closeWindow('about-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            <p style="color: var(--neon-color); margin-bottom: 15px; font-weight: bold;">> IDENTIFICATION CONFIRMED.</p>
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <div style="font-size: 3rem; margin-right: 20px; border: 2px solid var(--neon-color); padding: 10px; border-radius: 5px;">
+                    <i class="fas fa-user-ninja"></i>
+                </div>
+                <div>
+                    <p><strong>NAME:</strong> Harshith Gangaraju</p>
+                    <p><strong>STATUS:</strong> 1st Year B.Tech CSE</p>
+                    <p><strong>FOCUS:</strong> Red Teaming & Exploit Dev</p>
+                </div>
+            </div>
+            <hr style="border: 0; border-bottom: 1px dashed #333; margin: 10px 0;">
+            <p style="line-height: 1.6;">
+                I am an aspiring Offensive Security Engineer with a passion for breaking systems to build them stronger. 
+                Currently exploring the depths of <strong>Linux Automation</strong>, <strong>Active Directory Exploitation</strong>, 
+                and writing custom security tools in Python and Bash.
+            </p>
+        </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills-window" class="window" style="top: 120px; left: 150px;">
+        <div class="window-header">
+            <span class="window-title">/bin/tools</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('skills-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('skills-window')"></span>
+                <span class="close-btn" onclick="closeWindow('skills-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="skill-category">
+                <h3>[+] Network & Recon</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Nmap</span>
+                    <span class="skill-tag">Wireshark</span>
+                    <span class="skill-tag">Burp Suite</span>
+                    <span class="skill-tag">Recon-ng</span>
+                    <span class="skill-tag">Netdiscover</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>[+] Exploitation</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Metasploit</span>
+                    <span class="skill-tag">SQLMap</span>
+                    <span class="skill-tag">Hydra</span>
+                    <span class="skill-tag">John the Ripper</span>
+                    <span class="skill-tag">Searchsploit</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>[+] Programming</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">Bash Scripting</span>
+                    <span class="skill-tag">C/C++</span>
+                    <span class="skill-tag">HTML/JS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROJECTS - RESIZED SMALLER -->
+    <div id="projects-window" class="window" style="top: 15%; left: 20%; width: 550px; height: 450px;">
+        <div class="window-header">
+            <span class="window-title">~/projects</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('projects-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('projects-window')"></span>
+                <span class="close-btn" onclick="closeWindow('projects-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            
+            <div class="project-section-title">ACTIVE MODULES</div>
+            
+            <div class="project-card">
+                <div class="project-title">
+                    <span>Hacker OS Portfolio</span>
+                    <span class="project-status status-completed">COMPLETED</span>
+                </div>
+                <div class="project-desc">
+                    A fully interactive, web-based operating system UI built with Vanilla JS and CSS. Features a functional terminal, window management system, and theme toggling.
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-title">
+                    <span>Python Port Scanner v2</span>
+                    <span class="project-status status-wip">IN PROGRESS</span>
+                </div>
+                <div class="project-desc">
+                    Multi-threaded port scanner with banner grabbing and service version detection. Faster than standard socket connection attempts.
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-title">
+                    <span>Auto Recon Script (Bash)</span>
+                    <span class="project-status status-wip">IN PROGRESS</span>
+                </div>
+                <div class="project-desc">
+                    Automating initial enumeration: Nmap, Gobuster, and Nikto scans triggered against a target IP, outputting a formatted report.
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center; color: #666; font-style: italic;">
+                <i class="fas fa-info-circle"></i> Want to see the full roadmap? Run <code>cat roadmap.txt</code> in the terminal.
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CERTS -->
+    <div id="certs-window" class="window" style="top: 200px; left: 300px;">
+        <div class="window-header">
+            <span class="window-title">Certifications</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('certs-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('certs-window')"></span>
+                <span class="close-btn" onclick="closeWindow('certs-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="cert-grid">
+                <!-- GOALS (OffSec) -->
+                <div class="cert-card">
+                    <h3>OSCP</h3>
+                    <span class="cert-status status-goal">GOAL</span>
+                </div>
+                <div class="cert-card">
+                    <h3>OSWE</h3>
+                    <span class="cert-status status-goal">GOAL</span>
+                </div>
+                <div class="cert-card">
+                    <h3>OSCE</h3>
+                    <span class="cert-status status-goal">GOAL</span>
+                </div>
+                 <div class="cert-card">
+                    <h3>OSEP</h3>
+                    <span class="cert-status status-goal">GOAL</span>
+                </div>
+
+                <!-- PLANNED -->
+                <div class="cert-card">
+                    <h3>KLCP</h3>
+                    <span class="cert-status status-planned">PLANNED</span>
+                </div>
+                <div class="cert-card">
+                    <h3>OSWP</h3>
+                    <span class="cert-status status-planned">PLANNED</span>
+                </div>
+                <div class="cert-card">
+                    <h3>CCNA</h3>
+                    <span class="cert-status status-planned">PLANNED</span>
+                </div>
+                <div class="cert-card">
+                    <h3>AWS SEC</h3>
+                    <span class="cert-status status-planned">PLANNED</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTF -->
+    <div id="ctf-window" class="window" style="top: 220px; left: 100px;">
+        <div class="window-header">
+            <span class="window-title">CTF Stats</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('ctf-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('ctf-window')"></span>
+                <span class="close-btn" onclick="closeWindow('ctf-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="ctf-stat">
+                <div style="display:flex; justify-content:space-between;"><span>OverTheWire</span><span style="color:#ccc">Beginner</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 10%;"></div></div>
+            </div>
+            <div class="ctf-stat">
+                <div style="display:flex; justify-content:space-between;"><span>Hack The Box</span><span style="color:#ccc">Beginner</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 5%;"></div></div>
+            </div>
+            <div class="ctf-stat">
+                <div style="display:flex; justify-content:space-between;"><span>TryHackMe</span><span style="color:#ccc">Beginner</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 15%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div id="contact-window" class="window" style="top: 150px; left: 350px; width: 350px; height: 400px;">
+        <div class="window-header">
+            <span class="window-title">Connect</span>
+            <div class="window-controls">
+                <span class="min-btn" onclick="minimizeWindow('contact-window')"></span>
+                <span class="max-btn" onclick="maximizeWindow('contact-window')"></span>
+                <span class="close-btn" onclick="closeWindow('contact-window')"></span>
+            </div>
+        </div>
+        <div class="window-body">
+            <a href="https://www.linkedin.com/in/harshith-gangaraju-09a69638b" target="_blank" class="contact-link">
+                <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://github.com/hotaro6754" target="_blank" class="contact-link">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="mailto:harshith6754@gmail.com" class="contact-link">
+                <i class="fas fa-envelope"></i> Email
+            </a>
+            <a href="tel:+917075506754" class="contact-link">
+                <i class="fas fa-phone"></i> +91 7075506754
+            </a>
+            <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #666;">
+                <p>ENCRYPTED CONNECTION ESTABLISHED</p>
+                <p>IP: 127.0.0.1</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- CONFIGURATION & STATE --- */
+        const bootLog = document.getElementById('boot-log');
+        const bootScreen = document.getElementById('boot-screen');
+        const desktop = document.getElementById('desktop');
+        const taskbar = document.getElementById('taskbar');
+        
+        // Boot Sequence
+        const bootMessages = [
+            "INITIALIZING HARSHITH-OS KERNEL...",
+            "LOADING MODULES: [NET] [SEC] [CRYPTO]...",
+            "MOUNTING FILE SYSTEM...",
+            "CHECKING PERMISSIONS... ROOT ACCESS GRANTED",
+            "STARTING GRAPHICAL INTERFACE..."
+        ];
+
+        /* --- TYPEWRITER EFFECT HELPER --- */
+        function typeWriter(text, element, speed = 20, callback) {
+            let i = 0;
+            element.innerHTML = ""; // Clear existing
+            // Create a blinking cursor
+            const cursor = document.createElement('span');
+            cursor.innerText = '█';
+            cursor.style.animation = 'blink 1s infinite';
+            element.appendChild(cursor);
+
+            function type() {
+                if (i < text.length) {
+                    cursor.before(text.charAt(i));
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    cursor.remove();
+                    if (callback) callback();
+                }
+            }
+            type();
+        }
+
+        /* --- BOOT LOGIC --- */
+        async function runBootSequence() {
+            const hasBooted = sessionStorage.getItem('harshith_os_booted');
+            
+            if (hasBooted) {
+                // Skip boot
+                bootScreen.style.display = 'none';
+                desktop.style.opacity = '1';
+                taskbar.style.opacity = '1';
+                openWindow('terminal-window');
+            } else {
+                // Run boot with delay
+                for (const msg of bootMessages) {
+                    const p = document.createElement('div');
+                    p.className = 'log-line';
+                    bootLog.appendChild(p);
+                    // Use a promise to wait for typing to finish
+                    await new Promise(resolve => {
+                        typeWriter(`> ${msg}`, p, 15, resolve);
+                    });
+                    // Small pause between lines
+                    await new Promise(r => setTimeout(r, 100));
+                    bootLog.scrollTop = bootLog.scrollHeight;
+                }
+
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
+                    desktop.style.opacity = '1';
+                    taskbar.style.opacity = '1';
+                    openWindow('terminal-window');
+                    sessionStorage.setItem('harshith_os_booted', 'true');
+                }, 500);
+            }
+        }
+
+        /* --- MATRIX RAIN EFFECT --- */
+        function initMatrix() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%^&*';
+            const drops = [];
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+
+            for(let i = 0; i < columns; i++) drops[i] = 1;
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const style = getComputedStyle(document.body);
+                ctx.fillStyle = style.getPropertyValue('--neon-color') || '#ff003c';
+                ctx.font = fontSize + 'px monospace';
+
+                for(let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            setInterval(draw, 33);
+        }
+
+        /* --- SOUND ENGINE --- */
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.warn('Web Audio API not supported');
+                    return null;
+                }
+            }
+            return audioCtx;
+        }
+        function playSound(type = 'keypress') {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();
+            
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.1);
+            } else {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+            }
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + (type === 'error' ? 0.2 : 0.05));
+        }
+
+        /* --- WINDOW MANAGEMENT SYSTEM --- */
+        let zIndexCounter = 100;
+        let isMobile = window.innerWidth <= 768;
+
+        window.addEventListener('resize', () => {
+            isMobile = window.innerWidth <= 768;
+        });
+
+        // Taskbar Management
+        function updateTaskbar(id, title, isOpen) {
+            let taskItem = document.getElementById(`task-${id}`);
+            
+            if (isOpen && !taskItem) {
+                // Create new taskbar item
+                taskItem = document.createElement('div');
+                taskItem.id = `task-${id}`;
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `<i class="fas fa-window-maximize"></i> ${title}`;
+                taskItem.onclick = () => toggleMinimize(id);
+                taskbar.appendChild(taskItem);
+            } else if (!isOpen && taskItem) {
+                // Remove taskbar item
+                taskItem.remove();
+            }
+            
+            // Highlight active
+            document.querySelectorAll('.task-item').forEach(item => item.classList.remove('active'));
+            if (isOpen && taskItem) taskItem.classList.add('active');
+        }
+
+        function toggleMinimize(id) {
+            const win = document.getElementById(id);
+            // If it's effectively hidden (has closing class or display none)
+            if (win.style.display === 'none' || win.classList.contains('closing')) {
+                openWindow(id);
+            } else {
+                if (win.classList.contains('active-window')) {
+                    minimizeWindow(id);
+                } else {
+                    bringToFront(win);
+                }
+            }
+        }
+
+        function openWindow(id) {
+            const win = document.getElementById(id);
+            if (!win) return;
+            
+            const title = win.querySelector('.window-title').innerText;
+            updateTaskbar(id, title, true);
+
+            // FORCE RESET STATE: Ensure it's visible no matter what
+            win.style.display = 'flex';
+            
+            // Remove closing class immediately to stop any fade-out
+            win.classList.remove('closing');
+            
+            // Force Reflow/Repaint to ensure the browser realizes we are opening
+            void win.offsetWidth; 
+
+            // Add open class for animation and opacity=1
+            win.classList.add('open');
+            
+            // Positioning Logic (Run only if off-screen or unset)
+            if (!isMobile && !win.style.top) {
+                const offset = Math.floor(Math.random() * 50);
+                win.style.top = (100 + offset) + 'px';
+                win.style.left = (100 + offset) + 'px';
+            }
+            
+            bringToFront(win);
+        }
+
+        function closeWindow(id) {
+            const win = document.getElementById(id);
+            if (!win) return;
+            
+            // Remove from taskbar
+            updateTaskbar(id, null, false);
+
+            win.classList.remove('open');
+            win.classList.add('closing');
+            setTimeout(() => {
+                win.style.display = 'none';
+                win.classList.remove('closing');
+            }, 150);
+        }
+
+        function minimizeWindow(id) {
+            const win = document.getElementById(id);
+            win.classList.remove('open');
+            win.classList.add('closing');
+            setTimeout(() => {
+                win.style.display = 'none';
+                win.classList.remove('closing');
+            }, 150);
+            // Keep in taskbar, but remove active state
+            const taskItem = document.getElementById(`task-${id}`);
+            if (taskItem) taskItem.classList.remove('active');
+        }
+
+        function maximizeWindow(id) {
+            const win = document.getElementById(id);
+            if (win.style.width === '100%') {
+                win.style.width = '600px';
+                win.style.height = '400px';
+                win.style.top = '100px';
+                win.style.left = '100px';
+            } else {
+                win.style.width = '100%';
+                win.style.height = 'calc(100% - 40px)'; // Account for taskbar
+                win.style.top = '0';
+                win.style.left = '0';
+            }
+            bringToFront(win);
+        }
+
+        function bringToFront(win) {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active-window'));
+            document.querySelectorAll('.task-item').forEach(t => t.classList.remove('active'));
+            
+            win.classList.add('active-window');
+            win.style.zIndex = ++zIndexCounter;
+            
+            const taskItem = document.getElementById(`task-${win.id}`);
+            if (taskItem) taskItem.classList.add('active');
+        }
+
+        // Setup Dragging & Clicking
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousedown', () => bringToFront(win));
+            const header = win.querySelector('.window-header');
+            header.addEventListener('mousedown', e => {
+                if (isMobile) return;
+                e.preventDefault();
+                let startX = e.clientX;
+                let startY = e.clientY;
+                let startLeft = win.offsetLeft;
+                let startTop = win.offsetTop;
+
+                function onMouseMove(e) {
+                    let newLeft = startLeft + e.clientX - startX;
+                    let newTop = startTop + e.clientY - startY;
+                    win.style.left = newLeft + 'px';
+                    win.style.top = newTop + 'px';
+                }
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        });
+
+        /* --- TERMINAL LOGIC --- */
+        const cmdInput = document.getElementById('cmd-input');
+        const termOut = document.getElementById('terminal-output');
+        const terminalBody = document.getElementById('terminal-body');
+        
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        const ROADMAP = `
+<span style="color:var(--neon-color)">=== PROJECT ROADMAP [PLANNED] ===</span>
+
+<span style="color:#2ecc71">[LINUX + AUTOMATION]</span>
+• Auto Recon Framework (HarshRecon)
+• Linux Privilege Escalation Scanner
+• SSH Brute-force Automation
+• System Hardening Script
+• Custom Bash Shell (Mini)
+
+<span style="color:#3498db">[NETWORKING & AD]</span>
+• Active Directory Attack Lab
+• AD Enumeration Toolkit
+• Python Port Scanner v2
+• Packet Sniffer & MITM
+• DHCP Starvation Simulator
+
+<span style="color:#e67e22">[WEB APP SECURITY]</span>
+• Custom Burp Suite Extension
+• SQLi Exploitation Toolkit
+• XSS Payload Generator
+• Web Fuzzer (Dir/Param)
+• BAC Detection Tool
+
+<span style="color:#f1c40f">[PENTESTING TOOLS]</span>
+• Subdomain Enumerator
+• Wordlist Generator
+• Reverse Shell Generator
+• Hash Cracker (MD5/SHA)
+• Custom C2 Script
+
+<span style="color:#e74c3c">[EXPLOIT DEV]</span>
+• Buffer Overflow Lab
+• Win Buffer Overflow Exploit
+• Linux Shellcode Injector
+• Custom Payload Encoder
+• ROP Chain Generator
+
+<span style="color:#3498db">[RED TEAM OPS]</span>
+• Full Attack Path Sim
+• Phishing Framework
+• BloodHound Mapping
+• Shadow Creds Automation
+• Kerberoasting Toolkit
+
+<span style="color:#9b59b6">[MALWARE DEV]</span>
+• Stealth Keylogger
+• Custom Backdoor + C2
+• Reverse TCP RAT
+• Persistence Builder
+• Process Injection Demo
+
+<span style="color:#795548">[OSINT]</span>
+• OSINT Framework
+• Social Media Scraper
+• Image Metadata Analyzer
+• Dox Detection Tool
+• Breach Lookup Engine
+
+<span style="color:#2ecc71">[CLOUD SECURITY]</span>
+• AWS Pentest Lab
+• S3 Bucket Scanner
+• IAM PrivEsc Mapper
+• Cloud Recon Tool
+• Azure Attack Path Vis
+
+<span style="color:#95a5a6">[CTF PROJECTS]</span>
+• CTF Writeups Collection
+• Custom Exploit Repo
+• PrivEsc Automator
+• Binary Exp Notes
+• HTB Path Summary
+
+<span style="color:#8e44ad">[DEEP LEARNING]</span>
+• AI Malware Classifier
+• LLM Injection Detector
+• AI Attack Sim
+• AI CTF Solver
+• Neurogrid AI Agent
+
+<span style="color:#d35400">[CAPSTONE]</span>
+• Custom OffSec OS
+• Red Team Framework
+• Personal C2 Infra
+• Pentest Report Gen
+`;
+
+        function printOutput(text, isHtml = false) {
+            const div = document.createElement('div');
+            div.className = 'output';
+            if (isHtml) div.innerHTML = text;
+            else div.innerText = text;
+            termOut.appendChild(div);
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        /* SIMULATED HACKING */
+        async function runHackSimulation(target) {
+            const steps = [
+                `Resolving target ${target}...`,
+                `[+] Target found: 192.168.1.55`,
+                `Initiating port scan...`,
+                `[+] Open ports: 22, 80, 443, 3306`,
+                `Brute forcing SSH credentials...`,
+                `[!] Root password found: 'admin123'`,
+                `Establishing secure connection...`,
+                `[+] Access Granted.`,
+                `Downloading database... 100%`,
+                `Clearing logs...`
+            ];
+
+            for (const step of steps) {
+                printOutput(step);
+                await new Promise(r => setTimeout(r, Math.random() * 800 + 200));
+            }
+            printOutput(`<span style="color:var(--neon-color)">HACK COMPLETE. SYSTEM COMPROMISED.</span>`, true);
+        }
+
+        function handleCommand(cmd) {
+            const cleanCmd = cmd.trim().toLowerCase();
+            const args = cleanCmd.split(' ');
+            const mainCmd = args[0];
+
+            switch (mainCmd) {
+                case 'help':
+                    printOutput(`AVAILABLE COMMANDS:
+  open [window]   : Open a window
+  close [window]  : Close a window
+  hack [target]   : Run simulation
+  theme [color]   : Switch theme
+  whoami          : User info
+  ls              : List files
+  cat [file]      : Read file content
+  clear           : Clear terminal
+  reboot          : System restart`);
+                    break;
+                
+                case 'ls':
+                    printOutput("about.txt  roadmap.txt  skills.bin  projects/  certs/  contact.exe");
+                    break;
+
+                case 'cat':
+                    if (args[1] === 'roadmap.txt') printOutput(ROADMAP, true);
+                    else if (args[1] === 'about.txt') openWindow('about-window');
+                    else if (args[1] === '.hidden_flag') printOutput("FLAG{Y0U_F0UND_M3}", true);
+                    else printOutput(`cat: ${args[1] || ''}: No such file or directory`);
+                    break;
+
+                case 'hack':
+                    if (args[1]) runHackSimulation(args[1]);
+                    else printOutput("Usage: hack <target>");
+                    break;
+                    
+                case 'open':
+                    if (args[1]) {
+                        const winId = args[1] + '-window';
+                        if (document.getElementById(winId)) {
+                            openWindow(winId);
+                            printOutput(`Opening ${args[1]}...`);
+                        } else printOutput(`Error: Window '${args[1]}' not found.`);
+                    } else printOutput("Usage: open [about|skills|projects|certs|ctf|contact]");
+                    break;
+
+                case 'close':
+                    if (args[1]) {
+                        closeWindow(args[1] + '-window');
+                        printOutput(`Closing ${args[1]}...`);
+                    }
+                    break;
+
+                case 'theme':
+                    if (['red', 'green', 'blue'].includes(args[1])) {
+                        document.body.setAttribute('data-theme', args[1]);
+                        printOutput(`Theme changed to ${args[1].toUpperCase()}`);
+                    } else printOutput("Usage: theme [red|green|blue]");
+                    break;
+
+                case 'whoami': printOutput("uid=0(root) gid=0(root) groups=0(root)"); break;
+                case 'date': printOutput(new Date().toString()); break;
+                case 'sudo': printOutput("User is already root."); break;
+                case 'clear': termOut.innerHTML = ''; break;
+                case 'reboot': sessionStorage.removeItem('harshith_os_booted'); location.reload(); break;
+                case '': break;
+                default: printOutput(`bash: ${mainCmd}: command not found`); playSound('error');
+            }
+        }
+
+        // Terminal Inputs
+        cmdInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                const cmd = cmdInput.value;
+                if (cmd) {
+                    commandHistory.push(cmd);
+                    historyIndex = commandHistory.length;
+                    printOutput(`root@harshith-os:~# ${cmd}`, true);
+                    handleCommand(cmd);
+                    cmdInput.value = '';
+                    playSound();
+                    // Auto-focus after command
+                    setTimeout(() => cmdInput.focus(), 50);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    cmdInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    cmdInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    cmdInput.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+            }
+        });
+
+        /* --- KONAMI CODE --- */
+        let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not typing in terminal
+            if (document.activeElement === cmdInput) return;
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    document.body.setAttribute('data-theme', 'green');
+                    printOutput("<span style='color:#0f0'> *** GOD MODE ENABLED *** </span>", true);
+                    konamiIndex = 0;
+                }
+            } else konamiIndex = 0;
+        });
+
+        /* --- INIT --- */
+        runBootSequence();
+        initMatrix();
+
+    </script>
+</body>
+</html>
