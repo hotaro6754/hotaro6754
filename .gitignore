@@ -31,6 +31,10 @@ __pycache__/
 *.pyd
 .Python
 
+# Cybersecurity roadmap outputs
+cybersecurity-roadmap/output/*.pdf
+cybersecurity-roadmap/output/*.png
+
 # OS specific
 .Spotlight-V100
 .Trashes

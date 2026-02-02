@@ -1,0 +1,273 @@
+{
+  "stage_0": [
+    {
+      "name": "OverTheWire - Bandit",
+      "url": "https://overthewire.org/wargames/bandit/",
+      "description": "Linux basics and command line fundamentals",
+      "difficulty": "Absolute Beginner",
+      "focus": "Linux CLI, SSH, Basic commands"
+    },
+    {
+      "name": "OverTheWire - Leviathan",
+      "url": "https://overthewire.org/wargames/leviathan/",
+      "description": "Basic privilege escalation concepts",
+      "difficulty": "Beginner",
+      "focus": "Basic exploitation, File permissions"
+    },
+    {
+      "name": "PicoCTF",
+      "url": "https://picoctf.org/",
+      "description": "Beginner-friendly CTF challenges",
+      "difficulty": "Beginner",
+      "focus": "General security concepts, Puzzles"
+    }
+  ],
+  "stage_1": [
+    {
+      "name": "TryHackMe - Pre-Security Path",
+      "url": "https://tryhackme.com/path/outline/presecurity",
+      "description": "Fundamentals of cybersecurity before jumping into hacking",
+      "difficulty": "Absolute Beginner",
+      "focus": "Networking, Linux, Windows, Web basics",
+      "estimated_time": "40 hours"
+    },
+    {
+      "name": "TryHackMe - Complete Beginner Path",
+      "url": "https://tryhackme.com/path/outline/beginner",
+      "description": "Introduction to pentesting basics",
+      "difficulty": "Beginner",
+      "focus": "Nmap, Web hacking, Linux, Privilege escalation",
+      "estimated_time": "64 hours"
+    },
+    {
+      "name": "TryHackMe - Junior Penetration Tester",
+      "url": "https://tryhackme.com/path/outline/jrpenetrationtester",
+      "description": "Junior pentester certification path",
+      "difficulty": "Beginner",
+      "focus": "Pentesting methodology, Web app security, Network security",
+      "estimated_time": "56 hours"
+    },
+    {
+      "name": "HTB Academy - Starting Point",
+      "url": "https://academy.hackthebox.com/",
+      "description": "Introduction to penetration testing",
+      "difficulty": "Beginner",
+      "focus": "Enumeration, Exploitation basics, Reporting"
+    }
+  ],
+  "stage_2": [
+    {
+      "name": "TryHackMe - Offensive Pentesting",
+      "url": "https://tryhackme.com/path/outline/pentesting",
+      "description": "Advanced offensive security techniques",
+      "difficulty": "Intermediate",
+      "focus": "Advanced enumeration, Exploitation, Privilege escalation",
+      "estimated_time": "47 hours"
+    },
+    {
+      "name": "HTB Academy - Penetration Tester Path",
+      "url": "https://academy.hackthebox.com/path/preview/penetration-tester",
+      "description": "Comprehensive penetration testing training",
+      "difficulty": "Intermediate",
+      "focus": "Full pentesting methodology",
+      "estimated_time": "300+ hours"
+    },
+    {
+      "name": "PortSwigger Academy",
+      "url": "https://portswigger.net/web-security",
+      "description": "Free web application security training",
+      "difficulty": "Beginner to Advanced",
+      "focus": "Web vulnerabilities, Burp Suite"
+    }
+  ],
+  "stage_3": [
+    {
+      "name": "TryHackMe - Active Directory",
+      "url": "https://tryhackme.com/room/activedirectorybasics",
+      "description": "Active Directory exploitation paths",
+      "difficulty": "Intermediate",
+      "focus": "AD enumeration, Kerberoasting, Domain exploitation"
+    },
+    {
+      "name": "HTB - Easy to Medium Boxes",
+      "url": "https://www.hackthebox.com/",
+      "description": "Practice on real-world scenarios",
+      "difficulty": "Intermediate",
+      "focus": "Various exploitation techniques"
+    },
+    {
+      "name": "Proving Grounds",
+      "url": "https://www.offensive-security.com/labs/",
+      "description": "OffSec's practice platform",
+      "difficulty": "Intermediate",
+      "focus": "OSCP-like boxes"
+    }
+  ],
+  "stage_4": [
+    {
+      "name": "HTB - TJ Null OSCP List",
+      "url": "https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8",
+      "description": "Curated list of OSCP-like HTB boxes",
+      "difficulty": "Intermediate to Advanced",
+      "focus": "OSCP preparation"
+    },
+    {
+      "name": "Proving Grounds Practice",
+      "url": "https://www.offensive-security.com/labs/",
+      "description": "OSCP exam simulation environment",
+      "difficulty": "Intermediate to Advanced",
+      "focus": "OSCP-like challenges"
+    }
+  ],
+  "stage_5": [
+    {
+      "name": "HTB Academy - CPTS Path",
+      "url": "https://academy.hackthebox.com/preview/certifications/htb-certified-penetration-testing-specialist",
+      "description": "Comprehensive CPTS certification path",
+      "difficulty": "Advanced",
+      "focus": "Advanced pentesting, Full methodology"
+    },
+    {
+      "name": "HTB Pro Lab - Dante",
+      "url": "https://www.hackthebox.com/hacker/pro-labs",
+      "description": "Enterprise-level penetration testing simulation",
+      "difficulty": "Advanced",
+      "focus": "Network pivoting, Multi-stage attacks"
+    },
+    {
+      "name": "HTB Pro Lab - Zephyr",
+      "url": "https://www.hackthebox.com/hacker/pro-labs",
+      "description": "Advanced Active Directory environment",
+      "difficulty": "Advanced",
+      "focus": "Complex AD exploitation"
+    },
+    {
+      "name": "HTB Pro Lab - Offshore",
+      "url": "https://www.hackthebox.com/hacker/pro-labs",
+      "description": "Real-world enterprise network simulation",
+      "difficulty": "Advanced",
+      "focus": "Enterprise pentesting"
+    }
+  ],
+  "stage_6": [
+    {
+      "name": "HTB Pro Lab - RastaLabs",
+      "url": "https://www.hackthebox.com/hacker/pro-labs",
+      "description": "Red team operations and advanced AD",
+      "difficulty": "Expert",
+      "focus": "Red teaming, Evasion, Advanced AD"
+    },
+    {
+      "name": "TryHackMe - Red Teaming Path",
+      "url": "https://tryhackme.com/path/outline/redteaming",
+      "description": "Red team operations and tactics",
+      "difficulty": "Advanced",
+      "focus": "Red teaming, C2, Evasion",
+      "estimated_time": "48 hours"
+    }
+  ],
+  "stage_7": [
+    {
+      "name": "PortSwigger Academy - Advanced",
+      "url": "https://portswigger.net/web-security/all-topics",
+      "description": "Advanced web application security",
+      "difficulty": "Advanced to Expert",
+      "focus": "Advanced web exploitation, Code review"
+    },
+    {
+      "name": "HTB Academy - Web Advanced",
+      "url": "https://academy.hackthebox.com/",
+      "description": "Expert-level web security modules",
+      "difficulty": "Expert",
+      "focus": "Advanced web vulnerabilities, Source code analysis"
+    }
+  ],
+  "stage_8": [
+    {
+      "name": "TryHackMe - SOC Level 1",
+      "url": "https://tryhackme.com/path/outline/soclevel1",
+      "description": "Security operations center fundamentals",
+      "difficulty": "Intermediate",
+      "focus": "SIEM, Log analysis, Incident response",
+      "estimated_time": "40 hours"
+    },
+    {
+      "name": "Splunk Boss of the SOC",
+      "url": "https://www.splunk.com/en_us/blog/conf-splunklive/bots.html",
+      "description": "SIEM challenges and blue team exercises",
+      "difficulty": "Intermediate to Advanced",
+      "focus": "Splunk, Threat hunting"
+    }
+  ],
+  "stage_9": [
+    {
+      "name": "TryHackMe Wireless",
+      "url": "https://tryhackme.com/",
+      "description": "Wireless security challenges",
+      "difficulty": "Intermediate",
+      "focus": "WiFi attacks, WPA/WPA2 cracking"
+    },
+    {
+      "name": "Aircrack-ng Labs",
+      "url": "https://www.aircrack-ng.org/",
+      "description": "Wireless security testing tutorials",
+      "difficulty": "Intermediate",
+      "focus": "Wireless penetration testing"
+    }
+  ],
+  "stage_10": [
+    {
+      "name": "Exploit Education",
+      "url": "https://exploit.education/",
+      "description": "Binary exploitation challenges",
+      "difficulty": "Advanced",
+      "focus": "Buffer overflows, Exploit development"
+    },
+    {
+      "name": "OverTheWire - Narnia",
+      "url": "https://overthewire.org/wargames/narnia/",
+      "description": "Basic binary exploitation",
+      "difficulty": "Intermediate to Advanced",
+      "focus": "Linux exploitation"
+    },
+    {
+      "name": "HTB Pwn Boxes",
+      "url": "https://www.hackthebox.com/",
+      "description": "Binary exploitation challenges on HTB",
+      "difficulty": "Advanced",
+      "focus": "Binary exploitation, Reverse engineering"
+    }
+  ],
+  "stage_11": [
+    {
+      "name": "Custom Kernel Labs",
+      "url": "https://github.com/topics/kernel-exploitation",
+      "description": "Kernel exploitation practice",
+      "difficulty": "Expert",
+      "focus": "Kernel vulnerabilities, Advanced exploitation"
+    },
+    {
+      "name": "Windows Internals",
+      "url": "https://github.com/zodiacon/WindowsInternals",
+      "description": "Deep Windows internals and exploitation",
+      "difficulty": "Expert",
+      "focus": "Windows kernel, System internals"
+    }
+  ],
+  "stage_12": [
+    {
+      "name": "macOS Internals Labs",
+      "url": "https://github.com/topics/macos-security",
+      "description": "macOS security research labs",
+      "difficulty": "Expert",
+      "focus": "macOS internals, Security features"
+    },
+    {
+      "name": "XNU Kernel Research",
+      "url": "https://github.com/apple/darwin-xnu",
+      "description": "Apple XNU kernel source code and research",
+      "difficulty": "Expert",
+      "focus": "XNU kernel, macOS exploitation"
+    }
+  ]
+}

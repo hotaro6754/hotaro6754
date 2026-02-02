@@ -1,0 +1,326 @@
+{
+  "foundation": [
+    {
+      "name": "NetworkChuck",
+      "url": "https://www.youtube.com/@NetworkChuck",
+      "description": "Networking fundamentals, Linux basics, and cybersecurity introduction",
+      "focus_areas": ["Networking", "Linux", "Certifications"],
+      "stages": [0, 1]
+    },
+    {
+      "name": "Learn Linux TV",
+      "url": "https://www.youtube.com/@LearnLinuxTV",
+      "description": "Comprehensive Linux tutorials for beginners to advanced users",
+      "focus_areas": ["Linux", "System Administration", "DevOps"],
+      "stages": [0, 1]
+    },
+    {
+      "name": "PowerCert Animated Videos",
+      "url": "https://www.youtube.com/@PowerCertAnimatedVideos",
+      "description": "Clear animated explanations of networking and IT concepts",
+      "focus_areas": ["Networking", "IT Fundamentals", "Certifications"],
+      "stages": [0, 1]
+    },
+    {
+      "name": "David Bombal",
+      "url": "https://www.youtube.com/@davidbombal",
+      "description": "Networking, cybersecurity, and certification prep",
+      "focus_areas": ["Networking", "Cybersecurity", "CCNA", "Ethical Hacking"],
+      "stages": [0, 1, 2]
+    }
+  ],
+  "entry_certs": [
+    {
+      "name": "TryHackMe Official",
+      "url": "https://www.youtube.com/@RealTryHackMe",
+      "description": "Official TryHackMe walkthroughs and cybersecurity tutorials",
+      "focus_areas": ["THM JR", "Pentesting Basics", "CTF Walkthroughs"],
+      "stages": [1, 2],
+      "certifications": ["THM JR"]
+    },
+    {
+      "name": "The Cyber Mentor",
+      "url": "https://www.youtube.com/@TCMSecurityAcademy",
+      "description": "Practical ethical hacking, pentesting, and PNPT prep",
+      "focus_areas": ["eJPT", "PNPT", "Active Directory", "Web Hacking"],
+      "stages": [1, 2, 3],
+      "certifications": ["eJPT", "PNPT"]
+    },
+    {
+      "name": "John Hammond",
+      "url": "https://www.youtube.com/@_JohnHammond",
+      "description": "CTF walkthroughs, malware analysis, and security challenges",
+      "focus_areas": ["CTFs", "Malware Analysis", "Forensics", "eJPT"],
+      "stages": [1, 2, 3],
+      "certifications": ["eJPT", "THM JR"]
+    },
+    {
+      "name": "HackerSploit",
+      "url": "https://www.youtube.com/@HackerSploit",
+      "description": "Penetration testing tutorials and vulnerability assessments",
+      "focus_areas": ["Pentesting", "Vulnerability Assessment", "CEH"],
+      "stages": [1, 2],
+      "certifications": ["CEH", "eJPT"]
+    }
+  ],
+  "pnpt": [
+    {
+      "name": "The Cyber Mentor",
+      "url": "https://www.youtube.com/@TCMSecurityAcademy",
+      "description": "PNPT-focused content and practical pentesting",
+      "focus_areas": ["PNPT", "Active Directory", "Network Pentesting"],
+      "stages": [3],
+      "certifications": ["PNPT"]
+    },
+    {
+      "name": "TCM Security",
+      "url": "https://www.youtube.com/@TCMSecurityAcademy",
+      "description": "Practical cybersecurity training and PNPT preparation",
+      "focus_areas": ["PNPT", "Ethical Hacking", "Red Teaming"],
+      "stages": [3],
+      "certifications": ["PNPT"]
+    },
+    {
+      "name": "IppSec",
+      "url": "https://www.youtube.com/@ippsec",
+      "description": "Hack The Box walkthroughs with focus on Active Directory",
+      "focus_areas": ["HTB", "Active Directory", "OSCP", "PNPT"],
+      "stages": [3, 4, 5],
+      "certifications": ["PNPT", "OSCP", "CPTS"]
+    }
+  ],
+  "oscp": [
+    {
+      "name": "IppSec",
+      "url": "https://www.youtube.com/@ippsec",
+      "description": "Essential HTB walkthroughs for OSCP preparation",
+      "focus_areas": ["OSCP", "HTB", "Pentesting"],
+      "stages": [4, 5],
+      "certifications": ["OSCP", "CPTS"]
+    },
+    {
+      "name": "TJ Null",
+      "url": "https://www.youtube.com/@tjnull",
+      "description": "OSCP-specific guidance and box recommendations",
+      "focus_areas": ["OSCP", "Pentesting"],
+      "stages": [4],
+      "certifications": ["OSCP"]
+    },
+    {
+      "name": "S1REN",
+      "url": "https://www.youtube.com/@s1ren",
+      "description": "OSCP journey and penetration testing tutorials",
+      "focus_areas": ["OSCP", "Pentesting", "HTB"],
+      "stages": [4],
+      "certifications": ["OSCP"]
+    },
+    {
+      "name": "Rana Khalil",
+      "url": "https://www.youtube.com/@RanaKhalil101",
+      "description": "Web application security and OSCP preparation",
+      "focus_areas": ["OSCP", "Web Security", "OSWE"],
+      "stages": [4, 7],
+      "certifications": ["OSCP", "OSWE"]
+    }
+  ],
+  "cpts": [
+    {
+      "name": "Hack The Box Official",
+      "url": "https://www.youtube.com/@HackTheBox",
+      "description": "Official HTB content and CPTS preparation",
+      "focus_areas": ["CPTS", "HTB", "Advanced Pentesting"],
+      "stages": [5],
+      "certifications": ["CPTS"]
+    },
+    {
+      "name": "IppSec",
+      "url": "https://www.youtube.com/@ippsec",
+      "description": "Advanced box walkthroughs relevant to CPTS",
+      "focus_areas": ["CPTS", "HTB", "Advanced Techniques"],
+      "stages": [5],
+      "certifications": ["CPTS"]
+    },
+    {
+      "name": "John Hammond",
+      "url": "https://www.youtube.com/@_JohnHammond",
+      "description": "CTF and advanced security challenges",
+      "focus_areas": ["CPTS", "Advanced CTFs"],
+      "stages": [5],
+      "certifications": ["CPTS"]
+    }
+  ],
+  "oswe": [
+    {
+      "name": "Rana Khalil",
+      "url": "https://www.youtube.com/@RanaKhalil101",
+      "description": "Web application security expert and OSWE prep",
+      "focus_areas": ["OSWE", "Web Security", "Source Code Review"],
+      "stages": [7],
+      "certifications": ["OSWE"]
+    },
+    {
+      "name": "STÖK",
+      "url": "https://www.youtube.com/@STOKfredrik",
+      "description": "Bug bounty and advanced web security",
+      "focus_areas": ["OSWE", "Bug Bounty", "Web Exploitation"],
+      "stages": [7],
+      "certifications": ["OSWE"]
+    },
+    {
+      "name": "NahamSec",
+      "url": "https://www.youtube.com/@NahamSec",
+      "description": "Bug bounty hunting and web security",
+      "focus_areas": ["OSWE", "Bug Bounty", "Web Hacking"],
+      "stages": [7],
+      "certifications": ["OSWE"]
+    },
+    {
+      "name": "InsiderPhD",
+      "url": "https://www.youtube.com/@InsiderPhD",
+      "description": "Bug bounty tutorials and web application security",
+      "focus_areas": ["OSWE", "Bug Bounty", "Web Security"],
+      "stages": [7],
+      "certifications": ["OSWE"]
+    }
+  ],
+  "osep": [
+    {
+      "name": "ZeroPoint Security",
+      "url": "https://www.youtube.com/@zeropointsecurity",
+      "description": "Red team operations and OSEP-focused content",
+      "focus_areas": ["OSEP", "Red Teaming", "Evasion"],
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Sektor7",
+      "url": "https://www.youtube.com/@Sektor7",
+      "description": "Malware development and evasion techniques",
+      "focus_areas": ["OSEP", "Malware Dev", "AV Evasion"],
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Red Team Village",
+      "url": "https://www.youtube.com/@RedTeamVillage",
+      "description": "Red team tactics, techniques, and procedures",
+      "focus_areas": ["OSEP", "Red Teaming", "APT Simulation"],
+      "stages": [6],
+      "certifications": ["OSEP"]
+    }
+  ],
+  "osed": [
+    {
+      "name": "LiveOverflow",
+      "url": "https://www.youtube.com/@LiveOverflow",
+      "description": "Binary exploitation and exploit development",
+      "focus_areas": ["OSED", "OSEE", "Binary Exploitation"],
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "Corelan Team",
+      "url": "https://www.corelan.be",
+      "description": "Classic exploit development tutorials",
+      "focus_areas": ["OSED", "Buffer Overflows", "Shellcoding"],
+      "stages": [10],
+      "certifications": ["OSED"]
+    },
+    {
+      "name": "FuzzySecurity",
+      "url": "https://www.fuzzysecurity.com",
+      "description": "Windows exploitation and security research",
+      "focus_areas": ["OSED", "Windows Exploitation"],
+      "stages": [10],
+      "certifications": ["OSED"]
+    },
+    {
+      "name": "OALabs",
+      "url": "https://www.youtube.com/@OALABS",
+      "description": "Malware analysis and reverse engineering",
+      "focus_areas": ["OSED", "Reverse Engineering", "Malware Analysis"],
+      "stages": [10],
+      "certifications": ["OSED"]
+    }
+  ],
+  "osee": [
+    {
+      "name": "LiveOverflow",
+      "url": "https://www.youtube.com/@LiveOverflow",
+      "description": "Advanced exploitation and security research",
+      "focus_areas": ["OSEE", "Advanced Exploitation"],
+      "stages": [11],
+      "certifications": ["OSEE"]
+    },
+    {
+      "name": "OpenSecurityTraining2",
+      "url": "https://www.youtube.com/@OpenSecurityTraining2",
+      "description": "Advanced security training and research",
+      "focus_areas": ["OSEE", "Kernel Exploitation", "Advanced Topics"],
+      "stages": [11],
+      "certifications": ["OSEE"]
+    },
+    {
+      "name": "Saumil Shah",
+      "url": "https://www.youtube.com/@saumilshah",
+      "description": "Exploit development and ARM exploitation",
+      "focus_areas": ["OSEE", "ARM Exploitation"],
+      "stages": [11],
+      "certifications": ["OSEE"]
+    }
+  ],
+  "osmr": [
+    {
+      "name": "Objective-See",
+      "url": "https://objective-see.org",
+      "description": "macOS security tools and research",
+      "focus_areas": ["OSMR", "macOS Security"],
+      "stages": [12],
+      "certifications": ["OSMR"]
+    },
+    {
+      "name": "Patrick Wardle",
+      "url": "https://www.youtube.com/@patrickwardle",
+      "description": "macOS security expert and researcher",
+      "focus_areas": ["OSMR", "macOS Internals", "macOS Exploitation"],
+      "stages": [12],
+      "certifications": ["OSMR"]
+    }
+  ],
+  "oswp": [
+    {
+      "name": "Hak5",
+      "url": "https://www.youtube.com/@hak5",
+      "description": "Wireless hacking and security tools",
+      "focus_areas": ["OSWP", "Wireless Security"],
+      "stages": [9],
+      "certifications": ["OSWP"]
+    },
+    {
+      "name": "Vivek Ramachandran",
+      "url": "https://www.youtube.com/@securitytube",
+      "description": "Wireless security and penetration testing",
+      "focus_areas": ["OSWP", "Wireless Pentesting"],
+      "stages": [9],
+      "certifications": ["OSWP"]
+    }
+  ],
+  "osda": [
+    {
+      "name": "Security Onion",
+      "url": "https://www.youtube.com/@SecurityOnion",
+      "description": "Network security monitoring and threat hunting",
+      "focus_areas": ["OSDA", "Blue Team", "Threat Hunting"],
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "Blue Team Village",
+      "url": "https://www.youtube.com/@BlueTeamVillage",
+      "description": "Defensive security and blue team tactics",
+      "focus_areas": ["OSDA", "Blue Team", "Incident Response"],
+      "stages": [8],
+      "certifications": ["OSDA"]
+    }
+  ]
+}
