@@ -1,0 +1,386 @@
+{
+  "networking_enumeration": [
+    {
+      "name": "Nmap",
+      "description": "Network scanner for host discovery and port scanning",
+      "stages": [1, 2, 3, 4, 5, 6],
+      "certifications": ["eJPT", "CEH", "PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "Masscan",
+      "description": "Fast port scanner for large networks",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "RustScan",
+      "description": "Modern fast port scanner",
+      "stages": [3, 4, 5],
+      "certifications": ["OSCP", "CPTS"]
+    },
+    {
+      "name": "Enum4linux",
+      "description": "Linux enumeration tool for Windows shares",
+      "stages": [2, 3, 4],
+      "certifications": ["eJPT", "PNPT", "OSCP"]
+    },
+    {
+      "name": "CrackMapExec",
+      "description": "Swiss army knife for pentesting Windows/Active Directory",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "SMBMap",
+      "description": "SMB enumeration tool",
+      "stages": [2, 3, 4],
+      "certifications": ["eJPT", "PNPT", "OSCP"]
+    }
+  ],
+  "passwords": [
+    {
+      "name": "Hashcat",
+      "description": "Advanced password recovery tool",
+      "stages": [2, 3, 4, 5, 6],
+      "certifications": ["eJPT", "PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "John the Ripper",
+      "description": "Password cracker",
+      "stages": [1, 2, 3, 4],
+      "certifications": ["THM JR", "eJPT", "PNPT", "OSCP"]
+    },
+    {
+      "name": "Hydra",
+      "description": "Network logon cracker",
+      "stages": [1, 2, 3, 4],
+      "certifications": ["THM JR", "eJPT", "PNPT", "OSCP"]
+    },
+    {
+      "name": "SecLists",
+      "description": "Security wordlists collection",
+      "stages": [1, 2, 3, 4, 5, 6, 7],
+      "certifications": ["All"]
+    },
+    {
+      "name": "RockYou",
+      "description": "Popular password wordlist",
+      "stages": [1, 2, 3, 4],
+      "certifications": ["THM JR", "eJPT", "PNPT", "OSCP"]
+    }
+  ],
+  "web_testing": [
+    {
+      "name": "Burp Suite",
+      "description": "Web application security testing platform",
+      "stages": [1, 2, 3, 4, 5, 7],
+      "certifications": ["THM JR", "eJPT", "CEH", "PNPT", "OSCP", "CPTS", "OSWE"]
+    },
+    {
+      "name": "OWASP ZAP",
+      "description": "Web application security scanner",
+      "stages": [1, 2, 3, 7],
+      "certifications": ["THM JR", "eJPT", "CEH", "OSWE"]
+    },
+    {
+      "name": "Gobuster",
+      "description": "Directory/file brute-forcer",
+      "stages": [1, 2, 3, 4],
+      "certifications": ["THM JR", "eJPT", "PNPT", "OSCP"]
+    },
+    {
+      "name": "FFUF",
+      "description": "Fast web fuzzer",
+      "stages": [2, 3, 4, 5, 7],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSWE"]
+    },
+    {
+      "name": "SQLmap",
+      "description": "Automatic SQL injection tool",
+      "stages": [1, 2, 3, 7],
+      "certifications": ["THM JR", "eJPT", "CEH", "OSWE"]
+    },
+    {
+      "name": "Nikto",
+      "description": "Web server scanner",
+      "stages": [1, 2, 3],
+      "certifications": ["THM JR", "eJPT", "CEH"]
+    }
+  ],
+  "exploitation": [
+    {
+      "name": "Metasploit",
+      "description": "Exploitation framework",
+      "stages": [1, 2, 3, 4, 5],
+      "certifications": ["THM JR", "eJPT", "CEH", "PNPT", "OSCP"]
+    },
+    {
+      "name": "Searchsploit",
+      "description": "Exploit-DB search tool",
+      "stages": [1, 2, 3, 4, 5],
+      "certifications": ["THM JR", "eJPT", "PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "ExploitDB",
+      "description": "Exploit database",
+      "stages": [1, 2, 3, 4, 5],
+      "certifications": ["All pentesting certs"]
+    }
+  ],
+  "privilege_escalation": [
+    {
+      "name": "LinPEAS",
+      "description": "Linux privilege escalation scanner",
+      "stages": [2, 3, 4, 5],
+      "certifications": ["eJPT", "PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "WinPEAS",
+      "description": "Windows privilege escalation scanner",
+      "stages": [2, 3, 4, 5],
+      "certifications": ["eJPT", "PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "PowerUp",
+      "description": "PowerShell privilege escalation tool",
+      "stages": [3, 4, 5],
+      "certifications": ["PNPT", "OSCP", "CPTS"]
+    },
+    {
+      "name": "Seatbelt",
+      "description": "Windows host enumeration tool",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    }
+  ],
+  "active_directory": [
+    {
+      "name": "BloodHound",
+      "description": "Active Directory relationship mapper",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "PowerView",
+      "description": "PowerShell AD enumeration tool",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Responder",
+      "description": "LLMNR, NBT-NS and MDNS poisoner",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Impacket",
+      "description": "Python network protocols library",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Mimikatz",
+      "description": "Windows credential extraction tool",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Rubeus",
+      "description": "Kerberos abuse toolkit",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    }
+  ],
+  "red_team_evasion": [
+    {
+      "name": "Sliver",
+      "description": "Modern C2 framework",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Mythic",
+      "description": "Cross-platform C2 framework",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Empire",
+      "description": "PowerShell and Python post-exploitation framework",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Covenant",
+      "description": ".NET C2 framework",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Donut",
+      "description": "Shellcode generation tool",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    },
+    {
+      "name": "Veil",
+      "description": "Payload generator and antivirus evasion",
+      "stages": [6],
+      "certifications": ["OSEP"]
+    }
+  ],
+  "pivoting": [
+    {
+      "name": "Chisel",
+      "description": "Fast TCP/UDP tunnel",
+      "stages": [4, 5, 6],
+      "certifications": ["OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Ligolo-NG",
+      "description": "Simple and lightweight tunneling tool",
+      "stages": [4, 5, 6],
+      "certifications": ["OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "ProxyChains",
+      "description": "Force connections through proxy servers",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    },
+    {
+      "name": "Socat",
+      "description": "Multipurpose relay tool",
+      "stages": [3, 4, 5, 6],
+      "certifications": ["PNPT", "OSCP", "CPTS", "OSEP"]
+    }
+  ],
+  "wireless": [
+    {
+      "name": "Aircrack-ng suite",
+      "description": "Complete wireless security suite",
+      "stages": [9],
+      "certifications": ["OSWP"]
+    },
+    {
+      "name": "Reaver",
+      "description": "WPS brute-force attack tool",
+      "stages": [9],
+      "certifications": ["OSWP"]
+    },
+    {
+      "name": "Bettercap",
+      "description": "Network attack and monitoring tool",
+      "stages": [9],
+      "certifications": ["OSWP"]
+    },
+    {
+      "name": "Kismet",
+      "description": "Wireless network detector and sniffer",
+      "stages": [9],
+      "certifications": ["OSWP"]
+    }
+  ],
+  "exploit_dev": [
+    {
+      "name": "WinDbg",
+      "description": "Windows debugger",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "Ghidra",
+      "description": "Software reverse engineering suite",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "IDA Pro",
+      "description": "Interactive disassembler",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "GDB",
+      "description": "GNU debugger",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "Radare2",
+      "description": "Reverse engineering framework",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    },
+    {
+      "name": "AFL",
+      "description": "American Fuzzy Lop - fuzzer",
+      "stages": [10, 11],
+      "certifications": ["OSED", "OSEE"]
+    }
+  ],
+  "defensive": [
+    {
+      "name": "Splunk",
+      "description": "SIEM platform",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "Elastic Stack",
+      "description": "Search and analytics platform",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "Security Onion",
+      "description": "Linux distribution for threat hunting and security monitoring",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "Wazuh",
+      "description": "Open-source security monitoring platform",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "Sigma",
+      "description": "Generic signature format for SIEM systems",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    },
+    {
+      "name": "YARA",
+      "description": "Malware identification and classification tool",
+      "stages": [8],
+      "certifications": ["OSDA"]
+    }
+  ],
+  "macos": [
+    {
+      "name": "Hopper",
+      "description": "macOS reverse engineering tool",
+      "stages": [12],
+      "certifications": ["OSMR"]
+    },
+    {
+      "name": "LLDB",
+      "description": "LLVM debugger for macOS",
+      "stages": [12],
+      "certifications": ["OSMR"]
+    },
+    {
+      "name": "Frida",
+      "description": "Dynamic instrumentation toolkit",
+      "stages": [12],
+      "certifications": ["OSMR"]
+    },
+    {
+      "name": "class-dump",
+      "description": "Utility for examining Objective-C runtime",
+      "stages": [12],
+      "certifications": ["OSMR"]
+    }
+  ]
+}

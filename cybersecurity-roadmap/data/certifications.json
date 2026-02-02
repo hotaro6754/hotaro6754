@@ -1,0 +1,262 @@
+{
+  "entry_level": [
+    {
+      "name": "THM JR",
+      "full_name": "TryHackMe Junior Penetration Tester",
+      "stage": 1,
+      "description": "Foundation-level path covering basic penetration testing concepts",
+      "key_topics": [
+        "Linux fundamentals",
+        "Web application security basics",
+        "Network security fundamentals",
+        "Basic privilege escalation",
+        "Burp Suite introduction"
+      ],
+      "estimated_time": "30-40 hours",
+      "difficulty": "Beginner",
+      "url": "https://tryhackme.com/path/outline/jrpenetrationtester"
+    },
+    {
+      "name": "eJPT",
+      "full_name": "eLearnSecurity Junior Penetration Tester",
+      "stage": 1,
+      "description": "Entry-level practical certification for aspiring penetration testers",
+      "key_topics": [
+        "Information gathering",
+        "Footprinting and scanning",
+        "Vulnerability assessment",
+        "Web application attacks",
+        "System/host-based attacks",
+        "Network-based attacks"
+      ],
+      "estimated_time": "40-60 hours",
+      "difficulty": "Beginner",
+      "url": "https://elearnsecurity.com/product/ejpt-certification/"
+    },
+    {
+      "name": "CEH",
+      "full_name": "Certified Ethical Hacker",
+      "stage": 1,
+      "description": "Industry-recognized certification covering ethical hacking and penetration testing",
+      "key_topics": [
+        "Footprinting and reconnaissance",
+        "Scanning networks",
+        "Enumeration",
+        "System hacking",
+        "Malware threats",
+        "Sniffing",
+        "Social engineering",
+        "Denial-of-service",
+        "Session hijacking",
+        "Web server and application hacking",
+        "SQL injection",
+        "Wireless network hacking",
+        "Mobile platform attacks",
+        "IoT and OT hacking",
+        "Cloud computing",
+        "Cryptography"
+      ],
+      "estimated_time": "60-120 hours",
+      "difficulty": "Beginner to Intermediate",
+      "url": "https://www.eccouncil.org/programs/certified-ethical-hacker-ceh/"
+    }
+  ],
+  "attack_focused": [
+    {
+      "name": "PNPT",
+      "full_name": "Practical Network Penetration Tester",
+      "stage": 3,
+      "description": "Practical certification focused on real-world pentesting with Active Directory",
+      "key_topics": [
+        "External network penetration testing",
+        "Internal network penetration testing",
+        "Active Directory exploitation",
+        "OSINT and information gathering",
+        "Web application exploitation",
+        "Wireless penetration testing",
+        "Post-exploitation",
+        "Reporting"
+      ],
+      "estimated_time": "100-150 hours",
+      "difficulty": "Intermediate",
+      "url": "https://certifications.tcm-sec.com/pnpt/"
+    },
+    {
+      "name": "OSCP",
+      "full_name": "Offensive Security Certified Professional",
+      "stage": 4,
+      "description": "Industry-standard certification for penetration testing professionals",
+      "key_topics": [
+        "Penetration testing with Kali Linux",
+        "Information gathering",
+        "Vulnerability scanning",
+        "Web application attacks",
+        "Buffer overflows",
+        "Privilege escalation (Windows and Linux)",
+        "Client-side attacks",
+        "Port redirection and tunneling",
+        "Active Directory attacks",
+        "Metasploit framework"
+      ],
+      "estimated_time": "200-400 hours",
+      "difficulty": "Intermediate to Advanced",
+      "url": "https://www.offensive-security.com/pwk-oscp/"
+    },
+    {
+      "name": "CPTS",
+      "full_name": "Certified Penetration Testing Specialist",
+      "stage": 5,
+      "description": "Comprehensive HTB certification covering advanced penetration testing",
+      "key_topics": [
+        "Advanced penetration testing methodologies",
+        "Footprinting and information gathering",
+        "Vulnerability assessment",
+        "Web and network attacks",
+        "Active Directory enumeration and attacks",
+        "Pivoting and lateral movement",
+        "Post-exploitation",
+        "Documentation and reporting"
+      ],
+      "estimated_time": "200-300 hours",
+      "difficulty": "Advanced",
+      "url": "https://academy.hackthebox.com/preview/certifications/htb-certified-penetration-testing-specialist"
+    },
+    {
+      "name": "OSEP",
+      "full_name": "Offensive Security Experienced Penetration Tester",
+      "stage": 6,
+      "description": "Advanced certification focusing on evasion techniques and red teaming",
+      "key_topics": [
+        "Operating system and programming theory",
+        "Client-side code execution",
+        "Application whitelisting bypasses",
+        "Antivirus evasion",
+        "Linux and Windows lateral movement",
+        "Microsoft SQL attacks",
+        "Active Directory exploitation",
+        "Combining the pieces"
+      ],
+      "estimated_time": "300-500 hours",
+      "difficulty": "Advanced",
+      "url": "https://www.offensive-security.com/pen300-osep/"
+    },
+    {
+      "name": "OSWE",
+      "full_name": "Offensive Security Web Expert",
+      "stage": 7,
+      "description": "Expert-level web application security and source code review certification",
+      "key_topics": [
+        "Source code review",
+        "Persistent XSS",
+        "Session hijacking",
+        "SQLi exploitation",
+        ".NET deserialization",
+        "Java deserialization",
+        "Remote code execution",
+        "Authentication bypass",
+        "Authorization bypass",
+        "Server-side template injection"
+      ],
+      "estimated_time": "300-500 hours",
+      "difficulty": "Expert",
+      "url": "https://www.offensive-security.com/awae-oswe/"
+    }
+  ],
+  "additional_offsec": [
+    {
+      "name": "OSDA",
+      "full_name": "Offensive Security Defense Analyst",
+      "stage": 8,
+      "description": "Blue team certification focusing on defensive security and threat hunting",
+      "key_topics": [
+        "Security information and event management",
+        "Log analysis",
+        "Threat hunting",
+        "Incident response",
+        "Network traffic analysis",
+        "Malware analysis basics",
+        "Digital forensics",
+        "Security monitoring"
+      ],
+      "estimated_time": "200-300 hours",
+      "difficulty": "Intermediate to Advanced",
+      "url": "https://www.offensive-security.com/soc200-osda/"
+    },
+    {
+      "name": "OSWP",
+      "full_name": "Offensive Security Wireless Professional",
+      "stage": 9,
+      "description": "Specialized certification for wireless network penetration testing",
+      "key_topics": [
+        "802.11 protocol analysis",
+        "WEP cracking",
+        "WPA/WPA2 cracking",
+        "WPA3 security",
+        "Wireless reconnaissance",
+        "Rogue access points",
+        "Evil twin attacks",
+        "WiFi client attacks"
+      ],
+      "estimated_time": "150-250 hours",
+      "difficulty": "Intermediate",
+      "url": "https://www.offensive-security.com/wifu-oswp/"
+    },
+    {
+      "name": "OSED",
+      "full_name": "Offensive Security Exploit Developer",
+      "stage": 10,
+      "description": "Exploit development certification focusing on Windows exploits",
+      "key_topics": [
+        "WinDbg basics",
+        "Stack buffer overflows",
+        "SEH overflows",
+        "Egg hunters",
+        "Reverse engineering",
+        "Shellcoding",
+        "Format string vulnerabilities",
+        "Custom exploits"
+      ],
+      "estimated_time": "300-500 hours",
+      "difficulty": "Advanced to Expert",
+      "url": "https://www.offensive-security.com/exp301-osed/"
+    },
+    {
+      "name": "OSEE",
+      "full_name": "Offensive Security Exploitation Expert",
+      "stage": 11,
+      "description": "Expert-level exploit development with advanced techniques",
+      "key_topics": [
+        "Advanced memory corruption",
+        "Kernel exploitation",
+        "Browser exploitation",
+        "Heap overflows",
+        "Use-after-free vulnerabilities",
+        "ROP chains",
+        "Advanced shellcoding",
+        "0-day development"
+      ],
+      "estimated_time": "500+ hours",
+      "difficulty": "Expert",
+      "url": "https://www.offensive-security.com/awe-osee/"
+    },
+    {
+      "name": "OSMR",
+      "full_name": "Offensive Security macOS Researcher",
+      "stage": 12,
+      "description": "Specialized certification for macOS security research and exploitation",
+      "key_topics": [
+        "macOS internals",
+        "XNU kernel architecture",
+        "macOS security features",
+        "Code signing and entitlements",
+        "Sandbox escapes",
+        "TCC bypasses",
+        "Privilege escalation on macOS",
+        "macOS malware development"
+      ],
+      "estimated_time": "300-500 hours",
+      "difficulty": "Expert",
+      "url": "https://www.offensive-security.com/macOS200-osmr/"
+    }
+  ]
+}

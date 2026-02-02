@@ -41,6 +41,31 @@ I am an aspiring Offensive Security Engineer with a passion for breaking systems
 
 ## 🎯 Featured Projects
 
+### 🗺️ Cybersecurity Certification Roadmap
+**Status**: ✅ Completed
+
+A comprehensive, interactive cybersecurity certification roadmap that generates professional PDF documents mapping resources to certification paths.
+
+**Features**:
+- 📚 13 learning stages (Beginner to Expert)
+- 🎓 12 certifications covered (OSCP, OSWE, OSEP, etc.)
+- 📺 40+ YouTube channels mapped to stages
+- 🧪 30+ practice labs and platforms
+- 🛠️ 70+ tools categorized by domain
+- 📄 Professional PDF with QR codes
+- 🎨 39-page formatted document
+
+**Quick Start**:
+```bash
+cd cybersecurity-roadmap
+pip install -r requirements.txt
+python roadmap_generator.py
+```
+
+**Documentation**: [cybersecurity-roadmap/README.md](./cybersecurity-roadmap/README.md)
+
+---
+
 ### 🖥️ Hacker OS Portfolio
 **Status**: ✅ Completed
 
