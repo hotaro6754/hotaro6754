@@ -26,10 +26,10 @@
 
 ## Slide 1 — Why it matters (industry loss)
 
-**On screen:** three loss numbers, each with a clickable [n] source marker; our question.
+**On screen:** team (Mahidhar, Sasikanth, Harshith); the problem title "Can 100% Accuracy Be Trusted?"; the paper under review with its number (IEEE Access, vol. 13, pp. 16133–16149, 2025, DOI 10.1109/ACCESS.2025.3526988) and an [1] button that opens it; three loss numbers, each with a clickable [n] source marker; our question.
 
 **Say:**
-> "Attacks cost real money. IBM's 2026 report puts the average data breach at 4.99 million dollars, a record, and it takes about 247 days to find and contain one. The FBI received over a million cybercrime complaints in 2025, with 20.9 billion dollars in reported losses. A detector that misses an attack costs money, and one that raises false alarms wastes analysts' time. So we ask: when a detector says '100% accurate', can we trust that score, and does it still work on new traffic?"
+> "We are Mahidhar, Sasikanth and Harshith. Our paper is *Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques*, IEEE Access, volume 13, 2025. Attacks cost real money. IBM's 2026 report puts the average data breach at 4.99 million dollars, a record, and it takes about 247 days to find and contain one. The FBI received over a million cybercrime complaints in 2025, with 20.9 billion dollars in reported losses. A detector that misses an attack costs money, and one that raises false alarms wastes analysts' time. So we ask: when a detector says '100% accurate', can we trust that score, and does it still work on new traffic?"
 
 **Careful wording:**
 - Say *"what failed defence costs"*. The IBM figure is the cost of a breach, not only of a missed detection.
