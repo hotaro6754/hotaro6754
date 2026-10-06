@@ -1,214 +1,173 @@
-# Beyond 100% — Speaker Notes (v2, audited against the full paper)
+# Beyond 100% — Speaker Notes (6 slides, beginner-friendly)
 
-**Deck:** `Beyond_100.pptx` — 13 slides, no notes inside the file.
-**Paper:** S. Ness, V. Eswarakrishnan, H. Sridharan, V. Shinde, N. V. P. Janapareddy, V. Dhanawat, *Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques*, IEEE Access, vol. 13, pp. 16133–16149, 2025. **DOI 10.1109/ACCESS.2025.3526988** (confirmed on the paper's first page). Received 9 Dec 2024, accepted 31 Dec 2024, published 8 Jan 2025.
-**Licence:** the paper is CC BY 4.0, so its figures are reused with attribution (each figure slide says so in the footer).
+**Deck:** `Beyond_100.pptx`: 6 slides, no notes inside the file.
+**Time:** about 1.5 minutes per slide, roughly 9 minutes.
+**Extra material:** `Beyond_100_Extended_13slides.pptx` has every figure from the paper (ROC curves, confusion matrices) if a judge asks to see them.
 
-**One-line story:** The paper says LightGBM detects attacks very well, but its own pages disagree on LightGBM's accuracy. We audit it, then ask whether the result survives new traffic, and propose LightGBM first with a modern AI model only when LightGBM is unsure.
-
-**Timing:** slides 1–10 are the talk (about 1 minute each, 10–12 minutes). Slides 11–13 are an appendix for questions. **Short slot (about 6 minutes):** use slides 1, 4, 5, 7, 8, 9.
+**The whole project in one sentence:** A recent IEEE paper says LightGBM detects network attacks very well, but its own numbers disagree and it was tested only on 1999 data, so we check it and add a "second look" for the cases where it is unsure.
 
 ---
 
-## What the full-paper audit changed in the first version of this deck
+## Words to know (also on slide 2)
 
-| First version said | The paper actually says | Fixed on |
-|---|---|---|
-| LightGBM train 1.00 → test 0.85 "as reported" | **Both ways.** Abstract, Introduction, Fig. 12, Conclusion say train 1.0 / test 0.85. Results text, Tables 5, 6, 8 say test 1.0 / train 0.85. | Slides 1, 4 |
-| 5 models | **7 models** in the results (Random Forest and Logistic Regression too) | Slide 2 |
-| "Best: LightGBM" | Only true under the 100% reading. The Conclusion says SVM attained the same 0.85. | Slide 2 |
-| KDD'99 is old (our view) | The paper says so itself (p.16147) and suggests CICIDS and NSL-KDD for future work | Slides 3, 9 |
-
----
-
-## Verified facts (with page numbers)
-
-| Claim | Where |
+| Word | Plain meaning |
 |---|---|
-| LightGBM "near-perfect training accuracy (1.0) and solid test accuracy (0.85)" | Abstract, p.16133 |
-| "training accuracy of 1.0 and test accuracy 0.85" | Introduction, p.16134 |
-| Fig. 12 bars: train ≈1.00, test ≈0.85; Fig. 13 AUC train 1.00 / test 0.98 | pp.16143–16144 |
-| "test accuracy of 1.0 and train accuracy of 0.85"; "perfect test accuracy at 100%" | Results text, pp.16143–16144 |
-| Table 5: LightGBM Test 1.0, Train 0.85, F1 0.85, Recall 0.85, Precision 0.88 | p.16145 |
-| Table 6: LightGBM 100.0%, 95% CI [99.8, 100.0] | p.16145 |
-| Table 8: "Our Study LightGBM 100.00 accuracy, 85.00 F1" vs CNN-LSTM 99.09 / 99.10 and GRU 97.80 / 97.60 | p.16147 |
-| Conclusion: "LightGBM's highest test accuracy was ... 0.85"; "SVM ... the same as LightGBM ... 0.85" | p.16147 |
-| Table 2 says train-test split "70%-30%"; text says "80:20" with 5-fold CV | pp.16138, 16140 |
-| Positive class (attack) 67,343; negative (normal) 58,630 (total 125,973) | p.16138 |
-| SMOTE used "because of the KDDCup99 dataset's class imbalance" | pp.16138–16139 |
-| Table 2 step 7: soft-voting ensemble; no ensemble result is reported | p.16138 |
-| Hardware: Windows 11, Intel i7-6600U @ 2.60 GHz | p.16136 |
-| "now more than two decades old"; recommends CICIDS and NSL-KDD | p.16147 |
-| False positives called "a significant problem"; latency and inference time left to future work | p.16146 |
-
-## Our own calculations (show them as "our calculation")
-
-All from the numbers printed in the paper's confusion matrices (Figs. 4, 5, 10, 11, 16):
-
-| Model | Wrong | Implied accuracy | Reported test | Normal flows flagged (false alarms) |
-|---|---|---|---|---|
-| Isolation Forest | 86,724 | 31.2% | 0.40 | 79% |
-| Naive Bayes | 22,762 | 81.9% | 0.81 | 17% |
-| XGBoost | 18,397 | 85.4% | 0.83 | 13% |
-| LightGBM | 17,137 | 86.4% | 0.85 or 1.00 | 12% (7,036 of 58,630) |
-| SVM | 16,464 | 86.9% | 0.85 | 12% |
-
-- **Every one of the 20 matrix cells equals class total × a two-decimal rate**, with zero residual (for example 58,630 × 0.88 = 51,594). Real predictions land on such round rates in a given cell with a probability of roughly half a percent. So the matrices look built from rounded rates, not computed from model predictions.
-- That also explains why LightGBM's and SVM's matrices share the same Normal-class counts (51,594 and 7,036): both have a 0.88 / 0.12 split.
-- **Matrix totals are 125,973**, the whole dataset, not the ~25,195 rows of a 20% test split.
-- **Recall check:** for six models, Table 5's recall is within 0.01 of test accuracy. LightGBM is the only exception (recall 0.85 vs "test accuracy" 1.0). The matrix's attack-class recall for LightGBM is exactly 0.850.
-- **Train-to-test drop:** 0.06 to 0.16 for every model (Table 5, with LightGBM per the abstract at 0.15). Under Reading B, LightGBM's test accuracy would be 15 points *above* its training accuracy.
-- *Minor, rough:* the widths of Table 6's confidence intervals imply a test set of about 2,000–3,000 rows if binomial, versus ~25,000 for a 20% split. This is a back-of-envelope estimate, so keep it out of the talk.
-
-## Still to confirm yourself
-
-1. **Which Kaggle file?** 125,973 rows matches the NSL-KDD training file, whose 67,343 rows are *normal*, whereas the paper calls 67,343 "attack". Open the Kaggle file the authors cite and check. Slide 6 marks this "TO CONFIRM". Do not say it as fact until you have checked.
-2. **Other small inconsistencies** (not on slides): the Conclusion says "Naive Bayes has the highest test accuracy, 0.81", but XGBoost (0.83) and SVM (0.85) are higher. Table 5 prints SVM recall as "0..86". Fig. 6 shows Naive Bayes train accuracy about 0.90 while the text says 0.89.
-
-**How to talk about it (important):** say *"the paper's own pages report two different numbers"* and *"the matrices look built from rounded rates"*. Do **not** say the authors made errors or fabricated anything. Say: *"this motivates an independent, audited reproduction."*
+| Network attack | Someone sending harmful traffic to break into or disrupt a network |
+| Anomaly | Unusual traffic that does not look like normal use |
+| Detector (IDS) | A program that watches traffic and flags attacks |
+| Training | The practice questions the model learns from |
+| Test | The exam: data the model has never seen |
+| Accuracy | Share of answers that are right |
+| Missed attack | A real attack the detector calls normal (costs money) |
+| False alarm | Normal traffic the detector calls an attack (wastes analyst time) |
+| LightGBM | A fast, popular model made of many small decision trees |
 
 ---
 
-## Slide-by-slide script
+## Slide 1 — Why it matters (industry loss)
 
-### 1 — Can 100% Accuracy Be Trusted?
-**On screen:** the two readings of LightGBM's accuracy; our question.
-> "Machine learning can help spot attack traffic. A recent IEEE Access paper tested seven models and picked LightGBM as the winner. But look at LightGBM's accuracy in that same paper. In the abstract, it's 1.00 on training data and 0.85 on test data. In the results tables, it's the other way round: 0.85 training, 1.00 test. So which number is right? And does it hold on new network traffic?"
+**On screen:** three loss numbers, each with a clickable [n] source marker; our question.
 
-### 2 — What Did the Paper Do?
-**On screen:** the paper's own Fig. 1; data, preparation, models, tuning, metrics; "reported winner".
-> "The authors took the KDD'99 data from Kaggle, about 126 thousand records, cleaned it, balanced it with SMOTE, scaled it, and compressed it with PCA. They compared seven models, tuned them, and scored them on accuracy, F1, recall and precision. LightGBM is called the winner, though the Conclusion says SVM matches it at 0.85."
+**Say:**
+> "Attacks cost real money. IBM's 2026 report puts the average data breach at 4.99 million dollars, a record, and it takes about 247 days to find and contain one. The FBI received over a million cybercrime complaints in 2025, with 20.9 billion dollars in reported losses. A detector that misses an attack costs money, and one that raises false alarms wastes analysts' time. So we ask: when a detector says '100% accurate', can we trust that score, and does it still work on new traffic?"
 
-### 3 — What Did the Paper Report?
-**On screen:** the paper's five train/test bar charts, Table 5.
-> "These are the paper's own charts. Blue is training, green is test. Every model drops from training to test, by 6 to 16 points, even on the paper's own data. Notice LightGBM's row in Table 5 is the reverse of its chart."
-**Aside:** four of five y-axes start at 0.70, which makes gaps look bigger. Links at the top right open the appendix.
+**Careful wording:**
+- Say *"what failed defence costs"*. The IBM figure is the cost of a breach, not only of a missed detection.
+- The FBI figure is *reported cybercrime losses* (mostly fraud). Do not call it "network attack losses".
 
-### 4 — Audit 1: Same Model, Two Accuracy Numbers
-**On screen:** Reading A vs Reading B with page numbers; the recall chart.
-> "Reading A says test 0.85. Reading B says test 1.00. The recall chart is a tie-breaker. For six models, recall is about equal to test accuracy. For LightGBM alone it isn't: 0.85 versus 1.00. And Table 8 uses the 100% figure to say LightGBM beats a CNN-LSTM at 99.09%."
+| Number | Source |
+|---|---|
+| $4.99M average breach cost, record, +12%; 247 days to identify and contain | IBM / Ponemon, *Cost of a Data Breach Report 2026* [2] |
+| $20.9B reported losses, +26%, over 1 million complaints | FBI IC3, *2025 Internet Crime Report* [3] |
+| Security AI and automation cut breach cost by $1.93M on average | IBM 2026 [2] (used on slide 5) |
 
-### 5 — Tie-Breaker: The Paper's Own Confusion Matrices
-**On screen:** Fig. 11; implied-accuracy table; two callouts.
-> "If LightGBM had 100% accuracy, its confusion matrix would have no errors. The paper's matrix shows 17,137 errors, about 86% accuracy. And every number in these matrices is the class total times a two-decimal rate, which real predictions almost never produce. So these matrices aren't independent proof. But even they point to about 0.86, not 1.00. Only an independent reproduction can settle it."
+> Confirm: I found these through IBM's and the FBI's pages and news summaries of them, but could not open the IC3 PDF itself. Check the exact $20.9B (reported as $20.877B in summaries) in the PDF before you present.
 
-### 6 — Audit 2: Questions the Setup Leaves Open
-**On screen:** six cards.
-> "Six open questions: which split, why SMOTE on balanced data, which dataset file, an ensemble that's never reported, a cross-study comparison that mixes setups, and no deployment evidence. They're questions, not accusations."
+---
 
-### 7 — Past Approach vs Our Approach
-**On screen:** comparison table, "+" marks what we add.
-> "The paper asked which model scores best. We ask whether the best model stays reliable when traffic changes. We keep its data and methods as the baseline, then add: an audited split, newer datasets, time, new-attack and missing-feature tests, false-alarm and speed metrics, and a confidence gate."
+## Slide 2 — What is this paper? (what, why, how)
 
-### 8 — Our Idea: Beyond 100%
-**On screen:** flowchart.
-> "LightGBM looks at every flow first, because it's fast. If it's confident, we accept. If not, a modern AI encoder takes a deeper look. Easy cases stay cheap; the expensive model runs only on hard ones."
+**On screen:** the paper's title and a button to open it; its own Fig. 1; WHAT / WHY / HOW cards; words to know.
 
-### 9 — How Will We Prove It?
-**On screen:** four steps; five tests; metrics; tech stack (chips open docs).
-> "Step one: reproduce the paper and settle 1.00 versus 0.85. Step two: newer datasets. Step three: different situations. Step four: compare LightGBM, a modern AI model and the combination. We show no results yet. This is the plan."
+**Say:**
+> "The paper is *Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques*, from IEEE Access, 2025. **What:** it tests seven machine-learning models on one job: is this traffic normal or an attack? **Why:** attackers keep changing tactics, so fixed rules fall behind, and models can learn from past traffic. **How:** it takes old traffic records called KDD'99, cleans them, trains each model on most of the data, tests on the rest, and compares the scores. LightGBM comes out as the winner."
 
-### 10 — From High Accuracy to Reliable Detection
-> "The goal is a detector that knows when it is confident and when it needs deeper analysis. The benefits listed are hypotheses to validate. Accuracy alone isn't enough."
+| Fact | Where in the paper |
+|---|---|
+| 7 models: Isolation Forest, Naive Bayes, XGBoost, LightGBM, SVM, Random Forest, Logistic Regression | Abstract and Tables 5–7 |
+| KDD'99 from Kaggle, 125,973 records | pp.16136, 16138 |
+| Imputation, de-duplication, SMOTE, z-score, PCA | pp.16138–16139 |
+| Accuracy, precision, recall, F1, ROC-AUC | p.16139 |
 
-### Appendix (slides 11–13, use for questions)
-- **11 ROC curves:** test AUC 0.98 for XGBoost, LightGBM, SVM yet accuracy only 0.83–0.85. The ranking is good but the default threshold may not carry over, which is a calibration question. (Our interpretation.)
-- **12 Confusion matrices:** the false-alarm rates computed from them (12% for LightGBM), which the paper never reports.
-- **13 Comparison charts and Tables 6–8:** the confidence interval and p-values are built on the disputed 100% figure; Table 8 compares with other papers' own results.
+---
+
+## Slide 3 — The paper's numbers, and what is lost
+
+**On screen:** practice-vs-exam chart for all 7 models; three loss cards; an analogy.
+
+**Say:**
+> "Here are the paper's own numbers. Blue is accuracy on the practice data, orange is accuracy on the exam. Every model loses points, between 6 and 16. And look at LightGBM: the abstract says 1.00 on practice and 0.85 on the exam, but the paper's tables print it the other way round. From LightGBM's own confusion matrix, we calculate about 15% of attacks missed and 12% of normal traffic falsely flagged. It's like scoring 100% on practice questions but 85% on the exam. How much more is lost on a *new* exam?"
+
+| Number | Source |
+|---|---|
+| Train / test: IF 0.50/0.40, NB 0.89/0.81, XGBoost 0.99/0.83, LightGBM 1.00/0.85, SVM 0.99/0.85, RF 0.98/0.82, LR 0.81/0.75 | Table 5, abstract |
+| LightGBM reported both ways | Abstract p.16133 (train 1.0, test 0.85) vs Tables 5, 6, 8 pp.16145–16147 (test 1.0, train 0.85) |
+| 15% missed, 12% false alarms | **Our calculation** from Fig. 11: 10,101 of 67,343 attacks missed; 7,036 of 58,630 normal flows flagged |
+
+**Note:** the "6–16 points" uses LightGBM as in the abstract (1.00 → 0.85 = 15).
+
+---
+
+## Slide 4 — What is the paper lacking?
+
+**On screen:** six gap cards with page numbers.
+
+**Say:**
+> "Six gaps, none of them an accusation. One: the data is from 1999, and the paper itself says it is more than two decades old. Two: only one dataset, so nothing on a different network, a new time period or new attacks. Three: the numbers disagree for LightGBM. Four: the testing is unclear. One table says a 70/30 split, the text says 80/20, and the confusion matrices look built from rounded rates. Five: false alarms and speed are discussed but never measured. Six: the model always gives a yes or no and never says 'I'm not sure'."
+
+| Gap | Evidence |
+|---|---|
+| Old data | p.16147: "more than two decades old" |
+| One dataset | pp.16137, 16147 (newer datasets named as future work) |
+| Numbers disagree | pp.16133, 16145, 16147; Table 8 uses 100% against CNN-LSTM 99.09% |
+| Unclear testing | Table 2 "70%-30%" p.16138; "80:20" p.16140; matrices (Figs. 4, 5, 10, 11, 16) |
+| No cost numbers | p.16146: false positives called "a significant problem"; latency left to future work |
+| Never "not sure" | The method (Table 2) outputs a label for every flow |
+
+**About "rounded rates" (our check):** every one of the 20 matrix cells equals class total × a two-decimal rate (e.g. 58,630 × 0.88 = 51,594), and each matrix totals 125,973, the whole dataset. Say *"look built from rounded rates"*, never "fabricated".
+
+---
+
+## Slide 5 — What are we solving?
+
+**On screen:** flowchart; "why AI?" note; paper-vs-ours table; the goal.
+
+**Say:**
+> "We don't replace LightGBM. It's fast and light. Every network flow goes to LightGBM first. If it's sure, we accept the answer at once. If it's not, a modern AI model takes a deeper look. Compared with the paper, we add newer datasets, tests for new time periods, networks and attacks, a rule for when to ask for a second look, and scores that include missed attacks, false alarms and speed. IBM finds that security AI and automation cut breach costs by 1.93 million dollars on average. Our goal: a detector that knows when it is confident, and when it needs a second look."
+
+```mermaid
+flowchart LR
+  F["Network flow"] --> L["LightGBM<br/>fast, light"]
+  L --> Q{"Sure?"}
+  Q -- YES --> R["Fast result"]
+  Q -- NO --> M["Modern AI<br/>deeper analysis"]
+  M --> Z["Final decision"]
+```
+
+---
+
+## Slide 6 — How will we prove it? (and references)
+
+**On screen:** four steps; what we will measure; tech stack (clickable); full reference list (clickable).
+
+**Say:**
+> "Step one: reproduce the paper's LightGBM and settle 1.00 versus 0.85. Step two: test on newer datasets such as CIC-IDS2017. Step three: test a new time period, new attack types and fewer features. Step four: compare LightGBM, a modern AI model and our combined approach. We'll measure accuracy, missed attacks, false alarms, speed, and how much traffic goes to the AI model. We have not run these yet, so no results are shown. Every source is on this slide and clickable."
+
+```mermaid
+flowchart LR
+  S1["1. Reproduce the paper's LightGBM"] --> S2["2. Test on newer datasets"]
+  S2 --> S3["3. New time, attacks, fewer features"]
+  S3 --> S4["4. Compare LightGBM / Modern AI / Combined"]
+```
+
+### References (IEEE style)
+
+1. S. Ness *et al.*, "Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques," *IEEE Access*, vol. 13, pp. 16133–16149, 2025. doi: [10.1109/ACCESS.2025.3526988](https://doi.org/10.1109/ACCESS.2025.3526988)
+2. IBM and Ponemon Institute, "Cost of a Data Breach Report 2026." <https://www.ibm.com/think/x-force/2026-cost-of-a-data-breach-ai-adversaries-enterprise-risk>
+3. FBI Internet Crime Complaint Center, "2025 Internet Crime Report." <https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf>
+4. "KDD Cup 1999 Data," UCI Machine Learning Repository. <https://archive.ics.uci.edu/dataset/130/kdd+cup+1999+data>
+5. G. Ke *et al.*, "LightGBM: A Highly Efficient Gradient Boosting Decision Tree," NeurIPS, 2017. <https://proceedings.neurips.cc/paper/2017/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf>
+6. Canadian Institute for Cybersecurity, "Intrusion Detection Evaluation Dataset (CIC-IDS2017)," Univ. of New Brunswick. <https://www.unb.ca/cic/datasets/ids-2017.html>
 
 ---
 
 ## 30-second answer
 
-> "A recent IEEE Access paper compared seven ML models for network attack detection and picked LightGBM. But the paper reports LightGBM's accuracy two ways, 1.00 test in the tables and 0.85 test in the abstract, and its confusion matrices point to about 0.86. So we reproduce it properly, test it on new traffic, and propose LightGBM first with a modern AI model only when LightGBM is unsure. Our goal is reliable detection, not just a high score."
+> "A recent IEEE Access paper compared seven machine-learning models for spotting network attacks and picked LightGBM. But it tested only on 1999 data, and its own numbers disagree: 1.00 versus 0.85. Attacks cost industry millions, so a score we can't trust is risky. We check the result on newer traffic, then add a second look: LightGBM answers the easy cases, and a modern AI model handles the ones it's unsure about."
 
 ## Likely questions
 
 | Question | Short answer |
 |---|---|
-| Are you saying the authors made a mistake? | No. We say the paper reports two numbers, and an independent reproduction is the way to settle it. |
-| Do you have results? | No. This is an idea-to-implementation plan; slide 9 is the evaluation plan. |
-| Isn't a train/test gap normal? | A gap is normal. A 15-point gap plus contradictory reporting is what we want to reproduce. |
-| Why LightGBM as the base? | It's the paper's headline model, it's fast, and it suits tabular flow data. |
-| Isn't a transformer already used in intrusion detection? | Yes. We don't claim novelty there; we test whether it improves reliability under change, at what cost. |
-| How do you decide "confident"? | A calibrated probability threshold from LightGBM; calibration is part of the plan. |
-| What if the gate is unreliable? | That's the key risk. If LightGBM is confidently wrong on shifted data, nothing is escalated. We measure this before building the second stage. |
-| Can you test a time shift on KDD'99? | No, the standard files have no timestamps. We use a dataset that has them (e.g. CICIDS2017 by day, UNSW-NB15). |
-| Why not just use one newer dataset? | Feature sets differ between datasets, so we use a common feature subset, plus a pair that share a feature extractor (CICIDS2017 and CSE-CIC-IDS2018). |
-| What if LightGBM turns out to generalise fine? | That's still a result: then the question becomes why, and whether the second stage is worth its cost. |
+| Are you saying the authors made a mistake? | No. We say the paper reports two numbers and tested on one old dataset, so we reproduce and test it ourselves. |
+| What is the "industry loss"? | What failed defence costs: $4.99M per breach on average (IBM 2026) and $20.9B reported cybercrime losses (FBI 2025). |
+| Do you have results? | Not yet. Slide 6 is the plan; no results are claimed. |
+| Why keep LightGBM? | It is fast, light and good on tabular network data. We add a second look only for hard cases. |
+| How does it know it is "unsure"? | LightGBM gives a probability. If it is low or close to 50/50, we ask the AI model. We will calibrate this. |
+| What if LightGBM is already great on new data? | Then we learn why, and check whether the AI step is worth its cost. That is still a result. |
+| Why not test on KDD'99 over time? | Its files have no timestamps, so time tests use newer datasets such as CIC-IDS2017. |
 
-## Phases (backup)
+## Still to confirm yourself
 
-| Phase | What | Decision gate |
-|---|---|---|
-| 0. Data audit | Duplicates, leakage, which file, split before preprocessing | Fix the splits before modelling |
-| 1. Reproduce | The paper's LightGBM, under both readings | Which number holds? |
-| 2. Break it | New period, new dataset, unseen attack, fewer features | Large drop, or does it hold? |
-| 3. Gate analysis | Calibration and confidence under shift | Is confidence usable as a gate? |
-| 4. Escalate | Second stage on uncertain flows, with a plain second-model control | Does it beat the control per unit of compute? |
-
-**Evaluation matrix (fill only after running):**
-
-| Evaluation | LightGBM | Modern AI | Combined |
-|---|---|---|---|
-| Same dataset (audited split) | | | |
-| New time period | | | |
-| New dataset | | | |
-| Unseen attack type | | | |
-| Reduced features | | | |
+1. **IC3 exact figure** (see slide 1 note).
+2. **Which Kaggle file the authors used.** 125,973 rows matches the NSL-KDD training file, where the 67,343 rows are *normal*, not "attack" as the paper says (p.16138). Check before saying it aloud; it is not on the 6 slides.
+3. **LightGBM 1.00 vs 0.85:** the abstract and Fig. 12 say train 1.00 / test 0.85. Tables 5, 6, 8 say test 1.00. Keep saying "reported two ways", not "wrong".
 
 ---
 
-## Diagram sources (Mermaid)
+## Visuals
 
-**Slide 2 — the paper's pipeline**
-```mermaid
-flowchart LR
-  A["Network traffic<br/>KDD'99 (Kaggle)"] --> B["Preprocess<br/>imputation, de-dup, SMOTE, z-score"]
-  B --> C["Feature extraction<br/>PCA"]
-  C --> D["7 ML models<br/>tuned, 5-fold CV"]
-  D --> E["Evaluate<br/>accuracy, F1, recall, precision, ROC"]
-```
-
-**Slide 7 — past vs our approach**
-```mermaid
-flowchart LR
-  subgraph Past["Past approach (the paper)"]
-    P1["One dataset"] --> P2["One random split"] --> P3["One model per flow"] --> P4["Accuracy / F1"]
-  end
-  subgraph Ours["Our approach"]
-    O1["Audited data + newer datasets"] --> O2["Time / dataset / attack / feature tests"] --> O3["LightGBM, then modern AI if unsure"] --> O4["F1 + false alarms + calibration + speed"]
-  end
-  P1 -.-> O1
-  P2 -.-> O2
-  P3 -.-> O3
-  P4 -.-> O4
-```
-
-**Slide 8 — our idea**
-```mermaid
-flowchart LR
-  F["Network flow"] --> L["LightGBM<br/>fast first pass"]
-  L --> Q{"Confident?"}
-  Q -- YES --> R["Fast result"]
-  Q -- NO --> M["Modern AI encoder<br/>deeper analysis"]
-  M --> Z["Final decision"]
-```
-
-**Slide 9 — the plan**
-```mermaid
-flowchart LR
-  S1["1. Reproduce the paper's LightGBM"] --> S2["2. Test on newer datasets"]
-  S2 --> S3["3. Test different situations"]
-  S3 --> S4["4. Compare LightGBM / Modern AI / Combined"]
-```
-
----
-
-## About the deck's visuals
-
-- **Navigation:** the numbered dots in the footer jump to that slide in slideshow mode. The pills on slide 3 link to the appendix, and the appendix slides link back.
-- **Tech-stack chips (slide 9):** open each tool's docs. This needs internet at the venue.
-- **Figures** on slides 2–5 and 11–13 are the paper's own, unaltered; the charts on slides 4 and 12 and the tables on slides 3 and 5 are native and editable.
-- **Icons:** generic glyphs, not official logos. To use official logos, drop them over the icon circles.
-- **Fonts:** Cambria (titles) and Calibri (body). No animations were added.
+- **Navigation:** the six dots in the footer jump to each slide. The [n] markers, the "Open paper" button and the tech-stack chips open their links (internet needed).
+- **Paper figure:** slide 2 uses the paper's own Fig. 1 (CC BY 4.0, attributed in the footer). The chart on slide 3 and the tables are native and editable.
+- **Icons:** generic glyphs, not official logos. No animations.
+- **Fonts:** Cambria (titles) and Calibri (body).
