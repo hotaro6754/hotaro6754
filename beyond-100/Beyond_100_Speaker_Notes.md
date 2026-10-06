@@ -24,24 +24,18 @@
 
 ---
 
-## Slide 1 — Why it matters (industry loss)
+## Slide 1 — Title page
 
-**On screen:** team (Mahidhar, Sasikanth, Harshith); the problem title "Can 100% Accuracy Be Trusted?"; the paper under review with its number (IEEE Access, vol. 13, pp. 16133–16149, 2025, DOI 10.1109/ACCESS.2025.3526988) and an [1] button that opens it; three loss numbers, each with a clickable [n] source marker; our question.
+**On screen:** *Beyond 100%*; tagline "From high accuracy to reliable detection"; four fields: PROBLEM TITLE, IEEE PAPER, PAPER NUMBER, TEAM MEMBERS; buttons that open IEEE Xplore and the DOI. No statistics on this slide.
 
-**Say:**
-> "We are Mahidhar, Sasikanth and Harshith. Our paper is *Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques*, IEEE Access, volume 13, 2025. Attacks cost real money. IBM's 2026 report puts the average data breach at 4.99 million dollars, a record, and it takes about 247 days to find and contain one. The FBI received over a million cybercrime complaints in 2025, with 20.9 billion dollars in reported losses. A detector that misses an attack costs money, and one that raises false alarms wastes analysts' time. So we ask: when a detector says '100% accurate', can we trust that score, and does it still work on new traffic?"
+**Say (about 20 seconds):**
+> "Good [morning/afternoon]. We are Mahidhar, Sasikanth and Harshith. Our project is *Beyond 100%: Testing and Improving ML-Based Network Attack Detection*. We reviewed the IEEE Access paper *Anomaly Detection in Network Traffic Using Advanced Machine Learning Techniques*, volume 13, pages 16133 to 16149, published in 2025."
 
-**Careful wording:**
-- Say *"what failed defence costs"*. The IBM figure is the cost of a breach, not only of a missed detection.
-- The FBI figure is *reported cybercrime losses* (mostly fraud). Do not call it "network attack losses".
-
-| Number | Source |
-|---|---|
-| $4.99M average breach cost, record, +12%; 247 days to identify and contain | IBM / Ponemon, *Cost of a Data Breach Report 2026* [2] |
-| $20.9B reported losses, +26%, over 1 million complaints | FBI IC3, *2025 Internet Crime Report* [3] |
-| Security AI and automation cut breach cost by $1.93M on average | IBM 2026 [2] (used on slide 5) |
-
-> Confirm: I found these through IBM's and the FBI's pages and news summaries of them, but could not open the IC3 PDF itself. Check the exact $20.9B (reported as $20.877B in summaries) in the PDF before you present.
+| Field | Value | Status |
+|---|---|---|
+| Paper title, authors, volume, pages | as above | Confirmed on the paper's first page |
+| DOI | 10.1109/ACCESS.2025.3526988 | Confirmed on the paper's first page |
+| IEEE Xplore document number | 10833631 | From your link, and it matched an earlier search. I could not open IEEE Xplore from the build environment, so click the button once to confirm. |
 
 ---
 
@@ -61,20 +55,28 @@
 
 ---
 
-## Slide 3 — The paper's numbers, and what is lost
+## Slide 3 — Can 100% accuracy be trusted? (paper numbers vs industry loss)
 
-**On screen:** practice-vs-exam chart for all 7 models; three loss cards; an analogy.
+**On screen:** a split screen. **Left, "In the paper":** practice-vs-exam chart for all 7 models and three mini-stats. **Right, "In industry":** three loss numbers with clickable [n] sources. The bottom bar links the two.
 
 **Say:**
-> "Here are the paper's own numbers. Blue is accuracy on the practice data, orange is accuracy on the exam. Every model loses points, between 6 and 16. And look at LightGBM: the abstract says 1.00 on practice and 0.85 on the exam, but the paper's tables print it the other way round. From LightGBM's own confusion matrix, we calculate about 15% of attacks missed and 12% of normal traffic falsely flagged. It's like scoring 100% on practice questions but 85% on the exam. How much more is lost on a *new* exam?"
+> "Here is our question: can 100% accuracy be trusted? On the left are the paper's own numbers. Blue is accuracy on the practice data, orange is accuracy on the exam. Every model loses points, between 6 and 16. And look at LightGBM: the abstract says 1.00 on practice and 0.85 on the exam, but the paper's tables print it the other way round. From LightGBM's own confusion matrix we calculate about 15% of attacks missed and 12% of normal traffic falsely flagged. Why does that matter? On the right is the industry's side. IBM's 2026 report puts the average data breach at 4.99 million dollars, a record, and 247 days to find and contain one. The FBI logged 20.9 billion dollars in reported cybercrime losses in 2025. Every point lost on the exam is a missed attack or a false alarm in the real world, and that is where the money goes."
+
+**Careful wording:**
+- Say *"what failed defence costs"*. The IBM figure is the cost of a breach, not only of a missed detection.
+- The FBI figure is *reported cybercrime losses* (mostly fraud). Do not call it "network attack losses".
 
 | Number | Source |
 |---|---|
 | Train / test: IF 0.50/0.40, NB 0.89/0.81, XGBoost 0.99/0.83, LightGBM 1.00/0.85, SVM 0.99/0.85, RF 0.98/0.82, LR 0.81/0.75 | Table 5, abstract |
 | LightGBM reported both ways | Abstract p.16133 (train 1.0, test 0.85) vs Tables 5, 6, 8 pp.16145–16147 (test 1.0, train 0.85) |
 | 15% missed, 12% false alarms | **Our calculation** from Fig. 11: 10,101 of 67,343 attacks missed; 7,036 of 58,630 normal flows flagged |
+| $4.99M average breach cost, record, +12%; 247 days to identify and contain | IBM / Ponemon, *Cost of a Data Breach Report 2026* [2] |
+| $20.9B reported losses, +26%, over 1 million complaints | FBI IC3, *2025 Internet Crime Report* [3] |
+| Security AI and automation cut breach cost by $1.93M on average | IBM 2026 [2] (used on slide 5) |
 
-**Note:** the "6–16 points" uses LightGBM as in the abstract (1.00 → 0.85 = 15).
+> Confirm: I found the industry figures through IBM's and the FBI's pages and news summaries of them, but could not open the IC3 PDF itself. Check the exact $20.9B (reported as $20.877B in summaries) in the PDF before you present.
+> The "6–16 points" uses LightGBM as in the abstract (1.00 → 0.85 = 15).
 
 ---
 
@@ -159,7 +161,7 @@ flowchart LR
 
 ## Still to confirm yourself
 
-1. **IC3 exact figure** (see slide 1 note).
+1. **IC3 exact figure** (see the slide 3 note).
 2. **Which Kaggle file the authors used.** 125,973 rows matches the NSL-KDD training file, where the 67,343 rows are *normal*, not "attack" as the paper says (p.16138). Check before saying it aloud; it is not on the 6 slides.
 3. **LightGBM 1.00 vs 0.85:** the abstract and Fig. 12 say train 1.00 / test 0.85. Tables 5, 6, 8 say test 1.00. Keep saying "reported two ways", not "wrong".
 
