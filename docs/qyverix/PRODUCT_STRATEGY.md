@@ -1,6 +1,6 @@
 # Qyverix Security Intelligence — Product Research & Architecture Specification
 
-**Version 2 · research checked 2026-11-12**
+**Version 2 · research checked 2026-11-12** · Execution plan: [EXECUTION_PLAN.md](./EXECUTION_PLAN.md)
 
 > **Positioning:** *From vulnerability discovery to verified remediation.*
 > **Philosophy:** *Don't just report vulnerabilities. Prove them. Fix them. Prove they're fixed.*
