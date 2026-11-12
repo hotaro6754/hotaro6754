@@ -1,268 +1,256 @@
-# Qyverix — Execution Plan
+# Qyverix Security Intelligence — Execution Plan
 
-**Companion to [PRODUCT_STRATEGY.md](./PRODUCT_STRATEGY.md) · 2026-11-12**
+**Version 2 · 2026-11-12 · companion to [PRODUCT_STRATEGY.md](./PRODUCT_STRATEGY.md)**
 
-This plan reconciles the two research resources and turns them into work you can schedule.
-
-| | Resource 1: "Qyverix AI Security Engineering Stack" | Resource 2: "Autonomous security engineering platform" research |
-|---|---|---|
-| Core message | Don't trust one AI agent. Layer proven scanners, centralize findings in DefectDojo, and add AI remediation behind verification. | Don't build a scanner wrapper. Build the missing evidence → fix → verify layer. |
-| Horizon | **Now.** Secure Qyverix's own code. | **Months.** Build a sellable product. |
-| Risk if done alone | You end up operating eight tools and building no IP | You build product for months on an insecure codebase, with no real-world data |
-
-**Resolution: run two tracks in parallel. Track A feeds Track B.**
-
-```
- TRACK A — "Secure Qyverix now"  (Resource 1)          TRACK B — "Build Qyverix Security Intelligence" (Resource 2)
- ────────────────────────────────────────────          ─────────────────────────────────────────────────────────────
- Scanners in CI on all Qyverix repos         ──data──►  Baseline numbers + real findings for the eval harness
- DefectDojo as system of record              ──data──►  Ground truth for dedupe/fingerprinting design
- ZAP + Shannon/Strix against staging         ──data──►  Competitor teardown (§14.4 of the spec)
- Weekly security review                      ◄─product─ Each Track B release is dogfooded here first
-```
-
-Track A is cheap, takes about two weeks, and is the right thing to do regardless of the product. It also gives Track B the one thing the research says matters most: **real, held-out, real-world findings** (the Nephilex lesson: 2% recall on real fixes vs +89 on a benchmark it was tuned on).
+> **The path:** build it as a Qyverix product → run it on Qyverix's own code → design partners → paying clients → *then* YC, with usage data in hand.
+> **The first product:** continuous authorization and tenant-isolation assurance for multi-tenant B2B SaaS, in TypeScript/JavaScript first.
 
 ---
 
-## 1. Where each resource item ended up
+## 1. How the three resources fit together
 
-| Item | Source | Decision | Where |
+| | Resource 1: security stack | Resource 2: platform research | Resource 3: market reality check |
 |---|---|---|---|
-| OpenGrep (SAST) | R1, R2 | Adopt in both tracks | A1, spec §6 |
-| Trivy + OSV-Scanner (SCA, containers, SBOM) | R1, R2 | Adopt | A1 |
-| Gitleaks (secrets, incl. history) | R1, R2 | Adopt, plus a pre-commit hook | A1 |
-| Checkov (IaC) | R1, R2 | Adopt | A1 |
-| Zizmor (GitHub Actions) | R2 | Adopt | A1 |
-| OWASP ZAP (DAST) | R1, R2 | Adopt, staging only | A3 |
-| Shannon (AI pentest) | R1, R2 | **Evaluation only** (AGPL). Run against staging; don't embed in the product. | A3, B teardown |
-| Strix (AI pentest) | R2 | Evaluate in Track A; optional evidence source in Track B | A3, B Phase 4 |
-| DefectDojo | R1, R2 | **Track A system of record.** Track B exports to it rather than rebuilding it. | A2 |
-| OWASP AppSec Agent | R1, R2 | Reference architecture (role separation) only | Spec §3.2 |
-| Nephilex | R1, R2 | Watch list. Corrected facts in spec §0. | — |
-| Mobb / Bugsy | R2 | Competitor; benchmark target | Spec §3 |
-| Open-ASM (external attack surface) | R1 | **Deferred.** Out of scope until Track B Phase 4+. ⚠️ GPL-3.0 per R1 (unverified). | §6 below |
-| Isolated remediation agent + verifier | R1, R2 | **Core Track B IP** | Spec §5.03 |
-| Non-negotiable safeguards | R1, R2 | Adopt in both tracks | Spec §10 |
-| 3-stage rollout (foundation → central → autonomous) | R1 | = Track A, then Track B | This doc |
-| 4-phase product roadmap | R2 | = Track B phases | §3 below |
-| Benchmarks (Juice Shop, OWASP Benchmark, AutoPenBench, SecureAgentBench, SecLLMHolmes, XBOW) | R1, R2 | Adopt; held-out discipline added | Spec §14 |
-| Weekly security review | R1, R2 | Adopt | §4 below |
-| RTX 3050 6 GB note | R1 | Scanners and triage model run locally; fixer and verifier models run on an API or GPU server | Spec §11 |
-| Don't train a custom LLM; no Kubernetes for the MVP | R2 | Adopt | Spec §1, §7 |
+| Core message | Layer proven scanners, centralize findings, put AI fixes behind verification | Build the missing evidence → fix → verify layer, not a scanner wrapper | That pitch is crowded. Narrow to application-specific invariants and authorization. |
+| What it gives this plan | The tools Qyverix runs on its own code now | The architecture, evidence model and benchmarks | The wedge, the first customer, and the order of work |
+| Risk if followed alone | Operating eight tools, no IP | A broad platform nobody can tell apart from funded competitors | A narrow tool with no foundation under it |
+
+**What changed from version 1 of this plan:**
+
+1. **The wedge is narrower.** Not "find, prove and fix everything". The first product is one promise: *your tenants cannot see each other's data, and we re-prove it on every pull request.*
+2. **The build order flipped.** The invariant gate ships before automated fixing. Fix generation is where the funded competitors and GitHub are strongest. Assurance on every PR is the part to own first, and it is sellable without auto-fix.
+3. **TypeScript/JavaScript first.** Python follows. Nothing else until one stack works properly.
+4. **Customer discovery runs alongside the build**, with a kill criterion. A crowded market proves interest in the category, not demand for this wedge.
+5. **The path is staged with gates:** product → clients → YC.
 
 ---
 
-## 2. Track A: Secure Qyverix now (weeks 1–3)
+## 2. The three stages
 
-**Owner:** 1 engineer, part-time. **Cost:** compute only.
-
-### A1 · Scanner foundation in CI (week 1)
-
-On every PR and nightly, for every Qyverix repository:
-
-| Check | Tool | Gate on PR? | Output |
+| Stage | When | Outcome | Gate to move on |
 |---|---|---|---|
-| Secrets (diff + full history once) | Gitleaks | **Block** on new secrets | SARIF |
-| SAST | OpenGrep (default security rulesets) | Warn first; block on high severity after triage | SARIF |
-| Dependencies | OSV-Scanner + Trivy fs | Warn; block on critical *with fix available* | SARIF + SBOM (CycloneDX) |
+| **1. Build and dogfood** | Weeks 1–12 | The invariant gate and proof-carrying fixes work on TS/JS apps, and run on Qyverix's own repositories | Held-out targets met (§3.4) **and** discovery confirms the wedge (§4) |
+| **2. Design partners → paying clients** | Months 4–9 | 3–5 external teams run it on every PR. The first of them pay. | Paying clients with retained weekly use (§5) |
+| **3. Scale, then YC** | After clients | More languages and bug classes. A YC application built on usage data. | YC readiness checklist (§6) |
+
+Timelines assume 2–3 engineers. Scale them if the team is different.
+
+---
+
+## 3. Stage 1: build and dogfood (weeks 1–12)
+
+Three workstreams run in parallel.
+
+```
+ A. Secure Qyverix now          B. Build the product                 C. Customer discovery
+ (scanner stack, Resource 1)    (wedge first, Resources 2 + 3)       (validate before over-building)
+ ───────────────────────────    ────────────────────────────────    ──────────────────────────────
+ real findings + staging  ───►  eval data, fixtures, dogfood target
+                                working demo on real code      ───►  shown in interviews
+                                                               ◄───  what teams actually fear / would pay for
+```
+
+### 3.1 Workstream A: secure Qyverix now (weeks 1–3, then steady state)
+
+One engineer, part-time. This is worth doing regardless of the product, and it produces the real-world data the product needs.
+
+**A1 · Scanners in CI on every Qyverix repository (week 1)**
+
+| Check | Tool | PR gate | Output |
+|---|---|---|---|
+| Secrets (diff, plus full history once) | Gitleaks | **Block** new secrets | SARIF |
+| SAST | OpenGrep | Warn; block high severity after triage | SARIF |
+| Dependencies | OSV-Scanner + Trivy fs | Block critical with a fix available | SARIF + CycloneDX SBOM |
 | Container images | Trivy image | Warn | SARIF |
-| IaC / Docker / Compose | Checkov + Trivy config | Warn | SARIF |
-| CI workflows | Zizmor | **Block** on template injection and excessive permissions | SARIF |
-| Pre-commit (developer machines) | Gitleaks | Local block | — |
+| IaC, Docker, Compose | Checkov + Trivy config | Warn | SARIF |
+| CI workflows | Zizmor | **Block** template injection and excess permissions | SARIF |
+| Developer machines | Gitleaks pre-commit | Local block | — |
 
-Rules:
-- Pin every action and image to a **commit SHA or digest**, not a tag.
-- CI tokens get least-privilege `permissions:`.
-- Upload all SARIF to GitHub code scanning (if available) **and** to DefectDojo.
+Pin actions and images to a commit SHA or digest. Give CI tokens least-privilege `permissions:`.
 
-**Exit:** every repo has a green or known-red baseline, and the existing findings are triaged into `fix`, `accept (with expiry)` or `false positive`.
+**A2 · DefectDojo as the system of record (week 2).** Docker Compose, internal only. One product per repo, imports from CI. Record the dedupe fields per tool, because workstream B's fingerprinting is designed from this data.
 
-### A2 · DefectDojo as the system of record (week 2)
+**A3 · Runtime testing on staging (weeks 2–3).** A staging environment with disposable data and seeded identities: at least two users per role and two tenants. The product's harness reuses the same fixtures. Run ZAP weekly. Run Shannon Lite and Strix once each with a fixed budget, **for evaluation only**, and record true/false positives, cost, time and reproducibility. Never point any of them at production.
 
-- Deploy with Docker Compose on internal infrastructure. Don't expose it publicly. Use SSO if available.
-- One *Product* per repo, one *Engagement* per CI pipeline, and import via the API on each run.
-- Turn on deduplication and record the hash-code fields used per tool. **Track B needs this data** to design its fingerprinting.
-- Weekly export of metrics (open by severity, mean time to remediate, FP rate per tool).
+**A4 · Weekly security review (30 minutes, from week 2).** New Critical/High findings and owners; findings past SLA; accepted risks about to expire; false-positive rate per tool; what the week's real findings teach the product.
+Starting SLAs: Critical 7 days · High 30 days · Medium 90 days · leaked secrets **rotated within 24 hours**.
 
-**Exit:** one place answers "what is open, who owns it, and is it actually fixed?"
+### 3.2 Workstream B: build the product
 
-### A3 · Runtime testing on staging (weeks 2–3)
+| Weeks | Build | Acceptance criterion |
+|---|---|---|
+| **1–2** · Foundations | Evaluation harness: crAPI, VAmPI and Juice Shop in docker-compose. **TenantBench v0**: two small multi-tenant TS/JS apps with seeded authorization bugs and their fixes, half frozen. **RealFix v0**: 30–50 real CVE-fix commits in JS/TS web repos, frozen. Baseline run of OpenGrep + Gitleaks + OSV + Trivy + ZAP. Repo skeleton, schema, GitHub App skeleton. TS/JS indexer with route and middleware extraction for Express, NestJS and Next.js. | One command produces the baseline table. ≥95% of routes found on the test apps, checked by hand. |
+| **3–4** · Graph and findings | Security graph v1: route → middleware → handler → query → table and tenant key. Scanner adapters and normalizer. Reachability. States *Suspected* and *Corroborated*. PR summary comment. | The query "routes that reach a tenant-owned table with no ownership check" is correct on TenantBench. Dedupe is at least as good as DefectDojo on workstream A data. **M1: a useful report with no LLM involved.** |
+| **5–6** · Invariants and proof | Application model and `.qyverix/invariants.yml`, proposed from the graph and API spec, confirmed by a human. Disposable environment runner (compose from repo, seeded identities, no egress). Differential multi-identity harness. Evidence capture (request/response, DB side effects). State *Reproduced*. | Finds the seeded tenant-isolation and IDOR bugs on the **frozen** half of TenantBench and on crAPI/VAmPI, with **zero false Reproduced**. **M2.** |
+| **7–8** · The PR gate | Change-impact selection: a graph diff picks the invariants affected by each PR. Required status check. Coverage report with uncovered routes listed. Incomplete runs reported as incomplete. Injection reproducers as the second bug family. | Seeded regression PRs are blocked before merge. The check finishes in under 10 minutes on the test apps (a target to validate). A timed-out run never reports clean. **M3: first shippable product.** |
+| **9–10** · Proof-carrying fixes | Root cause from the graph. Patch in an isolated worktree. Gates G1–G4. An independent verifier on a different model family, read-only. Draft PR built from the evidence bundle. States *Fixed* and *Verified*. | ≥60% secure repair rate on seeded authorization bugs, ≤5% regressions, on held-out cases. Each gate rejects a deliberately bad patch in its unit test. **M4.** |
+| **11–12** · Real-world validation | Run on Qyverix's repositories and on 2–3 friendly external repositories, with written permission. Compare against Semgrep/OpenGrep, GitHub agentic autofix and one pentest agent on the same cases. Write up results and limitations. | A report with precision, authorization coverage, repair rate, cost and time. **Go/no-go for stage 2.** |
 
-- A staging environment with **disposable data** and dedicated test accounts: ≥2 users per role and ≥2 tenants. The same fixtures are reused by Track B's authz harness.
-- ZAP automation-framework plan: authenticated baseline weekly, full active scan before releases.
-- A Shannon Lite **and** Strix run against staging, each once, with a fixed model budget. Record per finding: true or false positive, time, cost, reproducible (y/n). This is the first real data point of the competitor teardown.
-- Never run either against production.
+**Order of value.** After week 8 there is a product worth showing: it blocks a tenant-isolation regression before merge and proves it with a replayable request. Weeks 9–10 add fixing on top. If time slips, protect weeks 5–8.
 
-**Exit:** a short report comparing ZAP vs Shannon vs Strix on Qyverix staging, covering precision, unique true positives, cost and runtime.
-
-### A4 · Weekly security review (ongoing from week 2, 30 min)
-
-Agenda:
-1. New Critical/High findings since last week and their owners.
-2. Findings past SLA.
-3. Accepted risks expiring this month.
-4. FP rate per tool; tune or disable noisy rules.
-5. Track B: what last week's real findings teach the product (feeds the eval set).
-
-Initial SLAs: Critical 7 days · High 30 days · Medium 90 days · secrets **rotated within 24 h** (not just removed from code).
-
----
-
-## 3. Track B: Build Qyverix Security Intelligence
-
-**Assumption:** a team of 2–3 engineers. Scale the timelines if that's different.
-
-### B0 · Evaluation harness first (weeks 1–2, overlaps Track A)
-
-| Task | Acceptance criterion |
-|---|---|
-| docker-compose for OWASP crAPI, VAmPI, Juice Shop with seeded multi-tenant users | `make targets-up` brings all three up with fixtures |
-| Build **Qyverix-RealFix v0**: 30–50 real CVE-fix commits in Node/Python web repos (pre-fix commit + upstream patch + CWE) | Frozen, versioned and never used for tuning |
-| Baseline runner: OpenGrep + Gitleaks + OSV + Trivy + ZAP on all targets | One command produces a precision/recall table |
-| Metrics module (spec §14.2) | Outputs JSON + Markdown report |
-
-### B1 · Intelligence foundation (weeks 3–6)
-
-| Task | Acceptance criterion |
-|---|---|
-| Monorepo skeleton (layout below), FastAPI app, worker, Postgres, Redis, MinIO via compose | `docker compose up` gives a healthy stack |
-| Unified Finding + Evidence schema (spec §9) and migrations | Round-trips SARIF from all 5 scanners |
-| Normalizer + fingerprint/dedupe | Dedupe matches or beats DefectDojo on Track A data |
-| tree-sitter indexing for TS/JS + Python | Indexes a 100k-LOC repo in < 5 min |
-| Route + middleware extractors: Express, NestJS, FastAPI, Django | ≥95% of routes found on crAPI, VAmPI and 1 internal repo (manually verified) |
-| Security graph v1: route → middleware → handler → ORM query → table | Query "routes reaching table X with no ownership predicate" returns correct results on crAPI |
-| GitHub App: checks + summary comment | Runs on PRs in Qyverix repos (dogfood) |
-
-**Milestone M1:** useful repository-wide security report with no LLM involved.
-
-### B2 · Autonomous investigation (weeks 6–9)
-
-| Task | Acceptance criterion |
-|---|---|
-| State machine (spec §8) with checkpointing, budgets and audit log | Kill a worker mid-job and it resumes from the last state |
-| LiteLLM router + cost ledger | Cost per job and per state recorded |
-| Triage state (small model) with typed output | Invalid output → 1 retry → escalate, never guessing |
-| Staging sandbox runner (gVisor/rootless, no egress, reset per run) | Isolation test suite passes (no host socket, no egress, no token in env) |
-| Differential multi-identity authz harness | Finds known BOLA on crAPI/VAmPI; **0 false Confirmed** |
-| Injection reproducers (SQLi/NoSQLi/command) with deterministic oracles | Confirmed on Juice Shop known vulns |
-| Memory v1: FP suppression with expiry, attempt history, resumability | A second scan of an unchanged repo costs < 10% of the first |
-
-**Milestone M2:** the system separates *Hypothesis* from *Confirmed* with executed proof.
-
-### B3 · Autonomous remediation (weeks 9–12)
-
-| Task | Acceptance criterion |
-|---|---|
-| Root-cause state using graph + LLM | Patch location overlaps the upstream fix in ≥70% of RealFix cases |
-| Patch state in isolated git worktree | Never touches the default branch |
-| Gates G1–G4 (spec §5.03) | Each gate is unit-tested with a deliberately bad patch it must reject |
-| Independent verifier (different model family, read-only) | Disagreement → NEEDS_HUMAN |
-| PR generator from the evidence bundle | PR shows the reproducer before and after plus gate results |
-| Ablation: G1-only vs G1–G4 | Report how many test-passing patches were insecure |
-
-**Milestone M3 (go/no-go):** ≥60% secure repair rate, ≤5% regressions on MVP classes, held-out. If this fails, stop and fix before Phase 4. Don't add features.
-
-### B4 · Differentiated intelligence (weeks 13–24)
-
-- G5 variant search and G6 suppression detector.
-- Automatic custom-rule generation from confirmed findings.
-- Business-logic workflows: payments and refunds, invites, role changes, multi-step state.
-- Strix as an optional evidence source (if the Track A teardown justifies it).
-- IaC/CI coverage (Checkov, Zizmor) in the graph.
-- Cost dashboard, GitLab support, a minimal Next.js UI.
-- 2–3 design partners on staging.
-- Public benchmark report v1.
-
-### Proposed product repository layout
+### 3.3 Product repository layout
 
 ```
 qyverix-security/
 ├── apps/
 │   ├── api/                 # FastAPI: findings, evidence, jobs, GitHub App webhooks
 │   ├── worker/              # job runner; state machine executor
-│   └── web/                 # Next.js (Phase 4)
+│   └── web/                 # Next.js (stage 2)
 ├── core/
 │   ├── schema/              # Finding, Evidence, Job models + migrations
 │   ├── orchestrator/        # state machine, budgets, audit log
-│   ├── router/              # model routing + cost ledger (LiteLLM)
-│   ├── memory/              # versioned facts, FP suppressions, invariants
+│   ├── router/              # model routing + cost ledger
+│   ├── memory/              # versioned facts, suppressions with expiry
 │   └── policy/              # autonomy, target allowlist, destructive-action denylist
 ├── intel/
-│   ├── indexer/             # tree-sitter
-│   ├── extractors/          # express, nestjs, fastapi, django
-│   └── graph/               # security graph build + queries
-├── signals/                 # adapters: opengrep, osv, trivy, gitleaks, checkov, zizmor, zap, strix
+│   ├── indexer/             # tree-sitter (TS/JS first)
+│   ├── extractors/          # express, nestjs, nextjs; then fastapi, django
+│   ├── graph/               # security graph build, queries, per-commit diff
+│   └── impact/              # change-impact selection
+├── invariants/
+│   ├── model/               # identities, roles, tenants, resources
+│   ├── proposer/            # drafts invariants from graph + API spec
+│   └── compiler/            # invariants → harness tests
+├── signals/                 # adapters: opengrep, osv, trivy, gitleaks, checkov, zizmor, zap
 ├── verify/
-│   ├── sandbox/             # isolated runner
+│   ├── sandbox/             # disposable environment runner
 │   ├── authz_harness/       # differential multi-identity testing
 │   └── reproducers/         # injection oracles
-├── remediate/
-│   ├── rootcause/
-│   ├── patcher/
-│   ├── gates/               # G1–G6
-│   └── pr/
+├── remediate/               # rootcause, patcher, gates (G1–G6), pr
 ├── eval/
-│   ├── targets/             # compose files for crAPI, VAmPI, Juice Shop
-│   ├── realfix/             # frozen held-out dataset
-│   └── runner/              # metrics + ablations
+│   ├── targets/             # crAPI, VAmPI, Juice Shop
+│   ├── tenantbench/         # our seeded multi-tenant apps (half frozen)
+│   ├── realfix/             # frozen real CVE-fix commits
+│   └── runner/              # metrics, baselines, ablations
 └── deploy/compose/
 ```
 
+### 3.4 Stage 1 exit targets
+
+All measured on held-out data. Targets are starting points to revisit after the week 1–2 baseline.
+
+| Metric | Target |
+|---|---|
+| Evidence-backed precision (true positives ÷ Reproduced) | ≥95% |
+| Authorization coverage on TenantBench (boundaries tested ÷ boundaries in the model) | ≥90% |
+| Seeded authorization bugs found on the frozen half | Beat every baseline tool |
+| Secure repair rate (authorization bugs) | ≥60% |
+| Regression rate of Verified fixes | ≤5% |
+| Verification accuracy (Verified findings that are really fixed) | ≥98% |
+| Incomplete scans reported as clean | 0 |
+| Cost and time per verified fix | Reported |
+
 ---
 
-## 4. Calendar view
+## 4. Workstream C: customer discovery (weeks 1–4, then ongoing)
 
-| Week | Track A | Track B |
+Resource 3's sharpest point: a team might want "a complete autonomous security engineer", or might pay sooner for "tenant isolation never regresses". Those are different businesses, and only customers can say which.
+
+**Who:** 15–20 CTOs or lead engineers at B2B SaaS companies with a multi-tenant product, roughly 5–50 engineers, and no dedicated AppSec hire.
+
+**Ask about the past, not the product:**
+1. Have you had a tenant-isolation or authorization bug, a near miss, or a pentest finding of that kind? What happened?
+2. How do you check today that one customer can't reach another's data? Who owns it?
+3. What security tools do you pay for? What do you ignore from them?
+4. What did your last pentest or SOC 2 / enterprise security questionnaire cost you in time and money?
+5. Would you connect a staging environment and a repository to a tool that tests this on every PR? What would stop you?
+
+**Signals that the wedge is real:**
+- A specific incident, near miss or failed customer security review.
+- Hand-written authorization tests they find painful to maintain.
+- Willingness to connect staging for a trial.
+- An existing budget line it could replace (pentests, a scanner nobody reads).
+
+**Kill criterion.** If fewer than about a third of interviews show at least two of those signals by week 4, don't change the technology. Change the wedge. The fallbacks, in order: proof-carrying fixes on top of scanners the customer already runs; then software agencies that manage many client codebases.
+
+By week 6 there is a working demo on real code to show in these conversations.
+
+---
+
+## 5. Stage 2: design partners → paying clients (months 4–9)
+
+| Step | What happens | Evidence collected |
 |---|---|---|
-| 1 | A1 scanners in CI | B0 eval targets + RealFix dataset |
-| 2 | A2 DefectDojo · A4 weekly review starts | B0 baseline report |
-| 3 | A3 ZAP + Shannon/Strix teardown on staging | B1 skeleton, schema, normalizer |
-| 4–6 | Steady state; triage | B1 indexer, extractors, graph, GitHub App → **M1** |
-| 6–9 | Dogfood M1 on Qyverix repos | B2 state machine, sandbox, authz harness → **M2** |
-| 9–12 | Dogfood M2 | B3 remediation + gates → **M3 go/no-go** |
-| 13–24 | Replace overlapping Track A pieces with Qyverix where it measurably wins | B4 + design partners |
+| Recruit 3–5 design partners | From the discovery interviews. Multi-tenant TS/JS (or Python) product, staging available, an engineer who will give weekly feedback. | Signed permission and scope |
+| Onboard | Connect the repo, bootstrap the disposable environment, confirm the proposed invariants in one working session | Time to first Reproduced or first "all invariants hold" result |
+| Run on every PR for 4–6 weeks | Free pilot with a stated end date and success criteria agreed up front | Violations caught before merge, false blocks, check time, fix PRs merged |
+| Convert | Paid plan for those who met the criteria | Paying clients; reasons from those who decline |
+| Harden | Python support, hybrid deployment (cloud control plane, workers in the customer's environment), SSO and audit export, minimal web UI | — |
+
+**Pricing:** don't fix a number yet. Test per-repository and per-developer monthly pricing in the pilot conversations, and anchor against what the team already spends on pentests.
+
+**Build during stage 2, driven by partner demand only:** gates G5–G6, automatic rule generation from past findings, payment and workflow-state invariants, Checkov/Zizmor signals in the graph, the cost dashboard.
+
+**Gate to stage 3:** at least three paying clients, weekly active use on PRs retained for two months, and at least a handful of real invariant violations caught before merge in client code.
 
 ---
 
-## 5. Detection coverage roadmap
+## 6. Stage 3: scale, then YC
 
-Resource 2's "what it must detect" list, assigned to phases:
+Apply only when these are true. They are what separates Qyverix from a roadmap and a demo:
 
-| Category | Track A (now, tools) | Track B MVP (proved & fixed) | Track B later |
-|---|---|---|---|
-| Injection (SQLi, NoSQLi, command, XSS) | OpenGrep, ZAP | ✅ | — |
-| Broken access control / IDOR / BOLA / tenant isolation | ZAP (weak), Shannon/Strix | ✅ **flagship** | — |
-| SSRF | OpenGrep, ZAP | Hypothesis/Corroborated only | Confirmed via OOB callback oracle |
-| Auth flaws: JWT, session fixation, OAuth | OpenGrep, ZAP | — | ✅ Phase 4 |
-| Rate-limit bypass | ZAP (partial) | — | ✅ Phase 4 |
-| Business logic: payments, privilege escalation, workflow skipping | Shannon/Strix, manual | Partial (role escalation) | ✅ Phase 4 |
-| Dependency CVEs, malicious packages | OSV, Trivy | Reachability via graph | Malicious-package heuristics |
-| Secrets (code + history) | Gitleaks | Signal only | Auto-rotation guidance |
-| IaC, Docker, cloud misconfiguration | Checkov, Trivy | — | ✅ Phase 4 (in graph) |
-| CI/CD (GitHub Actions) | Zizmor | — | ✅ Phase 4 |
-| External attack surface | — | — | Open-ASM evaluation (post-Phase 4) |
+- [ ] The product is complete for its wedge: invariant gate and proof-carrying fixes, in two language stacks.
+- [ ] Paying clients, with retention data.
+- [ ] Real violations caught before merge in client code, with their consent to cite them (anonymized if needed).
+- [ ] A published held-out benchmark against Semgrep/OpenGrep, GitHub agentic autofix and one pentest agent, with methodology.
+- [ ] Clear numbers: precision, authorization coverage, secure repair rate, cost per verified fix.
+- [ ] A one-sentence difference from Corgea, ZeroPath, Gecko, Winfunc and MindFort that a client has said in their own words.
+- [ ] A decision on structure: stays a Qyverix product line, or spins out as its own company for the application.
+
+Expansion after that, in order: more languages (Python is already done by then; next Java/Go by client demand), broader bug classes (auth flows, SSRF with out-of-band oracles, rate limiting), then IaC/CI/cloud in the graph. External attack surface stays out until clients ask.
 
 ---
 
-## 6. Deferred on purpose
+## 7. Where each resource item landed
 
-- **Open-ASM / external attack surface:** a different buyer and a different problem. Revisit after M3. Verify its license (reported GPL-3.0) before any use.
-- **Custom security LLM:** no.
-- **Kubernetes / microservices:** no, until there's load that needs them.
-- **Polished dashboard:** not before M3.
-- **Auto-merge:** never.
+| Item | From | Decision |
+|---|---|---|
+| OpenGrep, Trivy, OSV-Scanner, Gitleaks, Checkov, Zizmor | R1, R2, R3 | Workstream A now; signals inside the product |
+| OWASP ZAP | R1–R3 | Workstream A on staging; baseline in evaluation |
+| DefectDojo | R1, R2 | Workstream A system of record; the product exports to it |
+| Shannon (AGPL) | R1–R3 | Evaluation only. Not embedded. |
+| Strix (Apache-2.0) | R2, R3 | Evaluation now; optional evidence source later |
+| CodeQL | R3 | Not bundled (license). Accept a customer's own SARIF. |
+| OWASP AppSec Agent | R1, R2 | Reference for role separation only |
+| Nephilex | R1, R2 | Watch list. Its 2% held-out recall is why evaluation is held-out. |
+| Mobb / Bugsy | R2 | Competitor |
+| Corgea, ZeroPath, Gecko, Winfunc, MindFort, Tolmo; 0.security, OpenHack, Casco | R3 | Funded competitors. Teardown where access is possible. They are the reason the wedge is narrow. |
+| GitHub agentic autofix | R3 | Standing baseline. It verifies with CodeQL, not with an exploit. |
+| Application-specific invariants | R3 | **The entry wedge** (weeks 5–8) |
+| Repository-to-runtime graph | R2, R3 | Weeks 1–4, incremental per commit |
+| Proof-carrying patches, five states | R1–R3 | Weeks 9–10. States: Suspected, Corroborated, Reproduced, Fixed, Verified. |
+| Change-impact intelligence | R3 | Weeks 7–8, inside the PR gate |
+| Gate for AI-written changes | R3 | Positioning for the same PR gate. Not a separate build. |
+| Persistent memory, model routing | R2 | Minimal in stage 1 (suppressions with expiry, cost ledger); deepen in stage 2 |
+| Benchmarks: Juice Shop, crAPI, VAmPI, AutoPenBench, SecureAgentBench, SecLLMHolmes, VulnGym, JITVul | R1–R3 | Evaluation harness. SecRepoBench (C/C++) is reference only. |
+| Open-ASM, external attack surface | R1 | Deferred |
+| Weekly security review | R1, R2 | Workstream A4 |
+| "Never report clean on timeout" | R3 | Hard rule, tested in weeks 7–8 |
+| RTX 3050 6 GB | R1, R3 | Scanners and evidence run locally. Models through an API. No local-inference requirement. |
 
 ---
 
-## 7. Decisions needed from you
+## 8. What not to build
+
+- A generic multi-agent framework with many overlapping agents.
+- Another dashboard that aggregates scanner alerts.
+- A chatbot that explains CVEs.
+- A fixer that doesn't prove its fixes.
+- Support for every language before one works properly.
+- A home-grown SAST engine, or a custom security LLM.
+- A compliance platform.
+- Anything that attacks production, or merges its own patches.
+- Kubernetes or microservices before load demands them.
+
+---
+
+## 9. Decisions needed from you
 
 | # | Decision | Recommendation | Blocks |
 |---|---|---|---|
-| 1 | Where should the product code live? | A new repo, e.g. `qyverix/qyverix-security` (private) | B1 |
-| 2 | Team size and who owns Track A | 1 part-time on Track A; 2–3 on Track B | Timeline |
-| 3 | Which Qyverix repos and staging env are in scope for Track A | All active repos; one shared staging | A1, A3 |
-| 4 | Model provider(s) and monthly budget | One hosted provider for fixer, a different family for verifier, local small model for triage; set a hard monthly cap | B2 |
-| 5 | Hosted vs self-host first | Hosted GitHub App for design partners; keep self-host path | B1 |
-| 6 | Design partners | 2–3 teams with Node/Python multi-tenant APIs + staging | B4 |
-| 7 | Shannon usage policy | Evaluation only, unless legal approves otherwise | A3, B4 |
+| 1 | Does Qyverix have its own multi-tenant TS/JS application to dogfood on? If not, whose is the first real target? | Use a Qyverix app if one exists; otherwise a friendly team's staging | Weeks 5–6, 11–12 |
+| 2 | Where does the product code live? | A new private repository (this one is your profile repo) | Week 1 |
+| 3 | Team: who builds, and who owns workstream A and the interviews? | 2–3 engineers on the build; one part-time on A; you lead the interviews | Timeline |
+| 4 | Model providers and a hard monthly budget | One provider for fixing, a different family for verifying, a cap from day one | Weeks 9–10 |
+| 5 | Which Qyverix repositories and staging environment are in scope for workstream A | All active repositories; one shared staging | Week 1 |
+| 6 | Who are the first 15–20 interview targets | Start from your own network of SaaS CTOs | Weeks 1–4 |

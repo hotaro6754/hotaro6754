@@ -1,11 +1,12 @@
 # Qyverix Security Intelligence — Product Research & Architecture Specification
 
-**Version 2 · research checked 2026-11-12** · Execution plan: [EXECUTION_PLAN.md](./EXECUTION_PLAN.md)
+**Version 3 · research checked 2026-11-12** · Execution plan: [EXECUTION_PLAN.md](./EXECUTION_PLAN.md)
 
-> **Positioning:** *From vulnerability discovery to verified remediation.*
-> **Philosophy:** *Don't just report vulnerabilities. Prove them. Fix them. Prove they're fixed.*
+> **Positioning:** *Understand the application. Prove the risk. Verify the fix.*
+> **Entry wedge:** continuous authorization and tenant-isolation assurance for multi-tenant B2B SaaS.
+> **Path:** build it as a Qyverix product → run it on Qyverix's own code → design partners → paying clients → only then YC.
 
-Qyverix is an autonomous application-security engineering platform. It understands a whole software system, finds exploitable weaknesses, **proves** them, **fixes** them, and **verifies** that the fix closed the hole without opening another. It is not another scanner, another AI pentester, or a dashboard over open-source tools.
+**Version 3 narrows the thesis.** "An AI security engineer that scans, exploits and fixes" is now the pitch of at least six YC-funded startups I could confirm, and GitHub made agentic autofix generally available in October 2026 (§3.3). Qyverix therefore enters through one thing it can do measurably better than a broad tool: know what must never happen in a *specific* application, test those rules on every code change, and attach executed proof to every finding and every fix. Repository-wide intelligence and verified remediation grow from that base. They are the destination, not the opening move.
 
 ## Contents
 
@@ -14,7 +15,7 @@ Qyverix is an autonomous application-security engineering platform. It understan
 2. [What the research says](#2-what-the-research-says)
 3. [Competitor teardown](#3-competitor-teardown)
 4. [Research-to-feature traceability matrix](#4-research-to-feature-traceability-matrix)
-5. [Six differentiating capabilities](#5-six-differentiating-capabilities)
+5. [Differentiating capabilities](#5-differentiating-capabilities)
 6. [Build vs integrate](#6-build-vs-integrate)
 7. [System architecture](#7-system-architecture)
 8. [Investigation state machine](#8-investigation-state-machine)
@@ -50,6 +51,13 @@ Only ✅ numbers should appear in pitch material. Everything else is a hypothesi
 | **Nephilex**: early alpha, integrated AI security engineer | ✅ **Corrected.** Version 1 of this doc wrongly said the repo couldn't be found. | `Nephilex/nephilex`, Apache-2.0, ~14 stars, "early alpha". **Its own README reports 2.0% recall on held-out real fix commits.** Semgrep also scored 2.0% and Bandit 10.2% (Python only). It reports +89.4 on the OWASP Benchmark (Python), but the README says its rules were developed *with that dataset visible*, so that score is not independent. |
 | **Mobb** | ✅ | Commercial hosted product. Its community edition **Bugsy** is MIT-licensed: a CLI that takes Checkmarx/CodeQL/Fortify/Snyk results and proposes fixes. I found no evidence of a self-hostable full platform. |
 | **Zizmor**: GitHub Actions security | ✅ | The repo has moved to `zizmorcore/zizmor` (the old `woodruffw/zizmor` link redirects). It covers template injection, credential leakage and excessive permissions in Actions, Dependabot and pre-commit configs. |
+| **VulnGym**: 184 advisories, 408 vulnerability entries, 23 repositories; coding agents struggle at repository-level detection and at building evidence traces | ✅ | arXiv 2608.02001. Detection only. Specific recall figures quoted in blogs (e.g. 22.58% best case on hard tasks) were not checked against the paper. |
+| **JITVul**: 879 CVEs, 91 vulnerability types, paired vulnerable/fixed commits | ✅ | ACL 2025, arXiv 2503.03586. LLMs label over 90% of samples "vulnerable" in some settings, which inflates F1. Pairwise accuracy is the honest measure. |
+| "SecureRepoBench": 318 tasks, 27 repositories, 15 CWEs | ✅ Name corrected | The benchmark is **SecRepoBench** (arXiv 2504.21205). It covers C/C++ secure code *completion*, so it is weak evidence for web-application repair. |
+| A.S.E. benchmark; SAST-adoption barriers study; Reddit thread on triage load | ⚠️ Not checked | Directional only. |
+| YC-funded overlap: Corgea, ZeroPath, Gecko Security, Winfunc, MindFort, Tolmo | ✅ | All have YC profiles with find / verify / fix claims. Details in §3.3. |
+| YC-funded overlap: 0.security, OpenHack, Casco | ⚠️ | 0.security appears only in a LinkedIn post (YC F26). I found nothing on OpenHack or Casco. |
+| **GitHub agentic autofix** | ✅ | Generally available since 15 Oct 2026. It validates a fix by **re-running CodeQL**, not by re-running an exploit. Default-branch alerts only. Needs Code Security or Advanced Security plus Copilot. |
 
 **Lesson from Nephilex:** its numbers are the strongest evidence in this document for our core thesis. Benchmark scores built with the test set visible look excellent (+89.4). The same tool on held-out real-world fix commits finds 2%. **Qyverix's evaluation must be held-out and real-world from day one**, or we will fool ourselves the same way.
 
@@ -61,13 +69,14 @@ Only ✅ numbers should appear in pitch material. Everything else is a hypothesi
 |---|---|---|
 | AI pentesting | A Strix/Shannon competitor | Crowded, well-funded open-source leaders, fast-moving. Hard to differentiate. |
 | AI code security | A Snyk/Semgrep competitor | Large incumbents, mature rule ecosystems, distribution advantages. |
-| **Autonomous security engineering** | Discovery + evidence + remediation + verification | **Pursue this.** No one owns the complete loop, and the research shows that is where agents fail. |
+| Autonomous security engineering | Discovery + evidence + remediation + verification | **The destination, not the entry point.** At least six YC-funded startups already claim this loop (§3.3), and GitHub ships agentic autofix. |
+| **Continuous authorization and tenant-isolation assurance** | A model of what must never happen in one application, tested on every change, with proof-carrying fixes | **Enter here.** Narrow, measurable with deterministic oracles, painful for multi-tenant SaaS, and the base the broader product grows from. |
 
 **Defensible IP**, in priority order:
-1. Evidence-based verification (a hypothesis is promoted only when executed proof exists).
-2. Security-verified autonomous patching (independent gates, re-exploitation).
-3. Application-specific business-logic and authorization testing.
-4. A repository-level security graph and attack paths.
+1. Application-specific security invariants, and the authorization harness that checks them.
+2. A repository-to-runtime security graph, updated incrementally per commit.
+3. Evidence-based verification (a suspicion is promoted only when executed proof exists).
+4. Proof-carrying patches (independent gates, re-exploitation).
 5. Repository security memory that compounds into deterministic rules.
 6. A continuously growing, held-out benchmark of real-world secure repairs.
 
@@ -88,6 +97,9 @@ Only ✅ numbers should appear in pitch material. Everything else is a hypothesi
 | R7 | Function → Repository (⚠️) | Real vulnerabilities span functions and files | Treat call graph, data flow and route maps as core infrastructure. |
 | R8 | Nephilex README (✅) | Visible-set scores do not transfer to held-out real fixes | Held-out, real-world evaluation only. |
 | R9 | Vendor practitioner survey (⚠️) | Manual validation burden; FP rate matters more than cost | Make evidence-backed precision a flagship metric. |
+| R10 | VulnGym (✅) | Coding agents struggle at end-to-end repository-level detection and at building a trace from entry point to effect | Build traces deterministically from the graph; don't ask the model to invent them. |
+| R11 | JITVul (✅) | LLMs over-predict "vulnerable"; paired vulnerable/fixed accuracy is the honest measure | Evaluate on pairs: flag the vulnerable version *and* clear the fixed one. |
+| R12 | GitHub agentic autofix (✅) | The market-default fixer verifies by re-running the scanner | Re-exploitation and invariant re-checks are what make a Qyverix fix different. |
 
 **Synthesis:** finding is getting cheaper; *completing the lifecycle reliably* is not. The opportunity is an evidence-driven system that moves between code understanding, exploit validation, remediation and independent verification.
 
@@ -115,7 +127,7 @@ Legend: ● strong · ◐ partial / paid tier · ○ absent or out of scope. The
 | **DefectDojo** (BSD) | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ● | ● |
 | **Qyverix (target)** | ● | ● (via OpenGrep) | ● (via OSV/Trivy) | ● (via Gitleaks) | ● (via Checkov/Zizmor) | ● (via ZAP) | ● | ● | ● | **●** | ◐ (export to DefectDojo) | ● |
 
-**The empty column is "Fix security verification".** Nobody publicly closes the loop by re-exploiting after the patch and diff-scanning for newly introduced weaknesses. That column is Qyverix's wedge.
+**Among these open-source tools and incumbents, the empty column is "Fix security verification".** None documents re-exploiting after the patch and diff-scanning for newly introduced weaknesses. The funded startups in §3.3 do claim parts of this, so the column is a place to out-execute, not an uncontested gap.
 
 ### 3.2 Where each competitor stops
 
@@ -133,6 +145,26 @@ Legend: ● strong · ◐ partial / paid tier · ○ absent or out of scope. The
 
 **Emerging (⚠️, verify before relying on these):** search results mention OpenAI security agents (Aardvark in private beta, an open-sourced Codex Security CLI). Frontier labs entering repo-level vulnerability finding and patching is the main strategic risk, and it reinforces that **evidence, verification and business-logic depth** must be the moat, not access to a strong model.
 
+### 3.3 Funded startups with the same pitch
+
+These are product claims from YC profiles and vendor pages, not audited capabilities. A missing mention on a website is not evidence that a feature is missing.
+
+| Company | What it claims | What to test against it |
+|---|---|---|
+| **Corgea** (YC S23) | AppSec platform that validates vulnerabilities and generates fixes, alongside Snyk/Semgrep. Per the research notes, also code-aware pentesting, exploit reproduction and continuous retesting. | Repeatability of verified patches; depth on application-specific authorization |
+| **ZeroPath** (YC S24) | AI-native SAST with detection and automated patching | Multi-service runtime behavior; security regression testing |
+| **Gecko Security** (YC F24) | Models how the application should behave, simulates attacks, verifies exploitable flaws, proposes fixes | Whether the application model persists and stays accurate as code changes |
+| **Winfunc** (YC S24) | "AI hacker" that finds, verifies and patches vulnerabilities in codebases | Reproducible coverage; independent verification of repairs |
+| **MindFort** (YC X25) | Agents that find, validate and patch in web apps and networks; continuous pentesting; a company page claims under 1% false positives | Determinism, cost, code-level fixes |
+| **Tolmo** (YC, founded 2026) | Security agents on a live knowledge graph of cloud services, containers and databases; waitlist | Code-level depth; graph accuracy |
+| 0.security, OpenHack, Casco | ⚠️ As described in the research notes; not confirmed | — |
+| **GitHub agentic autofix** (GA Oct 2026) | Agent investigates a code scanning alert, writes a fix, re-runs CodeQL, opens a draft PR; up to 25 alerts per PR | Verifies with the scanner, not an exploit; default-branch alerts only; no application-specific authorization model |
+
+**What this means for Qyverix:**
+- Business-logic testing, knowledge graphs, exploit validation and autonomous patching are all *claimed* by someone. None is a differentiator by name alone.
+- Qyverix can't win on breadth against funded teams. It can win on a narrow promise with measured results: one customer type, one bug family, deterministic proof, and published held-out numbers.
+- As far as public material shows, these products sell *discovery*: they go looking for vulnerabilities. The wedge here is *assurance*: a declared, versioned set of rules about the application that is re-proven on every change and never silently reported as clean. Treat that distinction as a hypothesis to confirm in the §14.4 teardown and in customer interviews.
+
 ---
 
 ## 4. Research-to-feature traceability matrix
@@ -141,19 +173,23 @@ Every major feature must trace to evidence and to a metric. If a feature has no 
 
 | Feature | Evidence | Design decision | Success metric (§14) |
 |---|---|---|---|
-| F1 Evidence states (Hypothesis → Corroborated → Confirmed) | R2, R8, R9 | Promotion only via executed artifacts. The LLM proposes; the harness decides. | Confirmed precision |
+| F1 Evidence states (Suspected → Corroborated → Reproduced → Fixed → Verified) | R2, R8, R9 | Promotion only via executed artifacts. The LLM proposes; the harness decides. | Evidence-backed precision |
 | F2 Security graph | R6, R7 | Built from deterministic parsers, not from LLM reading | Recall on cross-file bugs; root-cause accuracy |
 | F3 Investigation state machine | R3, Strix issues | Durable workflow; LLM inside bounded states; schema-validated tools | Job completion rate; stuck-job rate |
 | F4 Verified remediation gates | R4 | Fixer and verifier separated; re-exploit; diff-scan; suppression detector | Secure repair rate; regression rate |
-| F5 Differential authz harness | R1 (web stacks), BOLA prevalence | Multi-identity replay with a deterministic oracle | Confirmed authz findings on crAPI/VAmPI; FP = 0 |
+| F5 Differential authz harness | R1 (web stacks), BOLA prevalence | Multi-identity replay with a deterministic oracle | Reproduced authz findings on crAPI/VAmPI; FP = 0 |
 | F6 Human checkpoints | R5 | Escalate when evidence is insufficient instead of guessing | Assisted vs autonomous resolution rate |
 | F7 Persistent security memory | R3, Shannon resumability | Structured, versioned facts, not chat logs | Re-scan cost; repeat-FP rate |
-| F8 Cost-aware model routing | Shannon single-model runs, cost reports | Route by uncertainty, severity and complexity; per-job budgets | Cost per confirmed finding / per verified fix |
-| F9 Held-out benchmark | R8 | No tuning on the evaluation split | Results published per release |
+| F8 Cost-aware model routing | Shannon single-model runs, cost reports | Route by uncertainty, severity and complexity; per-job budgets | Cost per reproduced finding / per verified fix |
+| F9 Held-out benchmark | R8, R11 | No tuning on the evaluation split; paired vulnerable/fixed cases | Results published per release |
+| F10 Declared invariants + PR gate | R10, R12, §3.3 | Invariants live in the repo, compile to harness tests, and uncovered routes are reported | Authorization coverage; violations caught before merge |
+| F11 Change-impact selection | R7 | A graph diff selects the invariants and past findings affected by each PR | PR check time; missed-regression rate |
 
 ---
 
-## 5. Six differentiating capabilities
+## 5. Differentiating capabilities
+
+**Priority order in v3.** Capability 04, reframed as declared invariants, is the entry wedge and ships first. 02 (the graph) and 01 (evidence) are what make it work. 03 (verified remediation) ships once the invariant gate is in use, because fix generation is where competition is densest. 05 and 06 support all of them. 07 and 08 are new in this version.
 
 ### 01 · Evidence-first vulnerability intelligence *(highest priority)*
 
@@ -169,11 +205,13 @@ The core product object is the **evidence bundle**, not the report. It holds:
 
 | State | Required evidence | Shown as |
 |---|---|---|
-| **Confirmed** | A reproducer ran and a deterministic impact oracle passed | A vulnerability; can block a merge |
+| **Suspected** | A single scanner or model signal | An investigation lead. **Never shown as a vulnerability.** |
 | **Corroborated** | ≥2 *independent* signals agree (e.g. taint path + reachable route + matching DAST response) | Likely vulnerability |
-| **Hypothesis** | A single signal or LLM reasoning | An investigation lead. **Never shown as a vulnerability.** |
+| **Reproduced** | A reproducer ran and a deterministic impact oracle passed | A vulnerability; can block a merge |
+| **Fixed** | A patch exists and passes build and tests | Fix pending verification |
+| **Verified** | The original reproducer now fails, the invariants hold, and no new findings appeared | Closed, with proof |
 
-Transitions upward require an executed artifact. An LLM can *request* a promotion. It cannot *perform* one.
+Transitions upward require an executed artifact. An LLM can *request* a promotion. It cannot *perform* one, and it never marks its own patch Verified.
 
 ### 02 · Whole-repository security graph *(high priority)*
 
@@ -182,7 +220,7 @@ Route ─► Middleware chain (authn? authz? roles?) ─► Handler ─► Servi
 Package ─► CVE (OSV) ─► Reachable call sites        IaC resource ─► Exposure ─► Service it hosts        CI workflow ─► Secrets / permissions
 ```
 
-Sources: tree-sitter parsing, per-language call graphs, framework route extractors (Express/Nest, FastAPI/Django first), OpenGrep taint output, Joern-style code property graphs where depth is needed, SBOMs, and Checkov/Trivy/Zizmor output. The LLM **queries** the graph. It doesn't build it from raw source text. This makes "reachable CVE", "route without an ownership check" and "tenant filter missing on this query path" into queries rather than guesses.
+Sources: tree-sitter parsing, per-language call graphs, framework route extractors (Express, NestJS and Next.js first; FastAPI/Django next), OpenGrep taint output, Joern-style code property graphs where depth is needed, SBOMs, and Checkov/Trivy/Zizmor output. The LLM **queries** the graph. It doesn't build it from raw source text. This makes "reachable CVE", "route without an ownership check" and "tenant filter missing on this query path" into queries rather than guesses. The graph also records runtime observations (which endpoints exist and how they respond), and it is updated incrementally per commit, not rebuilt for every question.
 
 ### 03 · Security-verified autonomous remediation *(high priority, most visible)*
 
@@ -218,12 +256,37 @@ The engine reasons about:
 
 It derives tests from API specs (OpenAPI/GraphQL), the security graph, and **explicitly configured test accounts**.
 
+**Invariants are declared, versioned and reviewed.** The engine proposes them from the graph and the API spec. A human confirms them once. They then live in the repository:
+
+```yaml
+# .qyverix/invariants.yml
+model:
+  tenant_key: organization_id
+  roles: [owner, admin, member, billing, anonymous]
+  resources:
+    invoice: { owner: organization, routes: ["/api/invoices/**"] }
+    user:    { owner: self,         routes: ["/api/users/**"] }
+invariants:
+  - id: tenant-isolation
+    rule: "no principal reads or writes a resource owned by another organization"
+    applies_to: [invoice, project, document]
+  - id: no-self-escalation
+    rule: "a member cannot change any role, including their own"
+    routes: ["PATCH /api/users/:id/role"]
+  - id: paid-feature-gate
+    rule: "an organization on plan=free cannot call routes tagged paid"
+  - id: refund-finality
+    rule: "a refunded payment never transitions to paid"
+```
+
+Each invariant compiles to concrete harness tests. A violation is a Reproduced finding. A new route that no invariant covers is reported as **uncovered**, never as safe.
+
 **Differential multi-identity harness:**
 1. Provision ≥2 users per role and ≥2 tenants in a disposable staging DB, using approved fixture scripts.
 2. Record the legitimate request for each route as its owner.
 3. Replay it as another user, the same role in another tenant, a lower role, and unauthenticated. Also skip, reorder and replay workflow steps.
 4. **The oracle is deterministic:** status code, response body and DB side effects compared against the expected access matrix. The LLM proposes the matrix and the mutations; the harness decides pass or fail.
-5. A failure is a Confirmed finding whose reproducer is already a regression test.
+5. A failure is a Reproduced finding whose reproducer is already a regression test.
 
 ### 05 · Persistent security memory
 
@@ -237,7 +300,7 @@ This is structured, versioned evidence, not vector blobs or chat transcripts. It
 
 Two payoffs:
 - **Resumability.** A scan resumes at the last completed state and never redoes finished work.
-- **Compounding.** Confirmed findings and conventions are compiled into **custom OpenGrep rules and harness invariants**, proposed in a PR. Each customer's codebase gets cheaper and more precise to scan over time, which a stateless agent cannot do.
+- **Compounding.** Reproduced findings and conventions are compiled into **custom OpenGrep rules and harness invariants**, proposed in a PR. Each customer's codebase gets cheaper and more precise to scan over time, which a stateless agent cannot do.
 
 ### 06 · Cost-aware multi-model orchestration
 
@@ -257,6 +320,14 @@ Two payoffs:
 
 *The model is replaceable. The evidence and workflow are not.*
 
+### 07 · Security change-impact intelligence
+
+On each PR, the graph diff answers: which invariants depend on the changed code, which routes are affected, and which previously Verified findings could have come back. Only those tests re-run. That keeps the check fast enough to be a required status on every PR, and it catches regressions that a periodic scan would find weeks later.
+
+### 08 · A gate for AI-written changes *(a distribution angle, not a separate product)*
+
+Coding agents raise the rate of change, so the same PR gate matters more. Don't position this as "we scan AI code": GitHub and Snyk are already there. Position it as the same invariant gate regardless of who wrote the diff, and later expose it as a tool a coding agent can call before it proposes a change.
+
 ---
 
 ## 6. Build vs integrate
@@ -272,6 +343,7 @@ Two payoffs:
 | Finding lifecycle UI | Integrate / export | SARIF, DefectDojo API |
 | Code property graph | Integrate where needed | tree-sitter, plus Joern (Apache-2.0) for deep languages |
 | **Security graph (routes → authz → data)** | **Build** | Our framework extractors |
+| **Application security model and invariant compiler** | **Build** | Core IP; the entry wedge |
 | **Evidence model and promotion rules** | **Build** | Core IP |
 | **Investigation state machine** | **Build** on a workflow engine | Temporal or a custom state machine |
 | **Differential authz / business-logic harness** | **Build** | Core IP |
@@ -335,14 +407,14 @@ INGEST(D) → INDEX(D) → SCAN(D) → NORMALIZE(D) → CORRELATE(D+L)
    → TRIAGE(L) ──discard──► CLOSED_FP (memory)
         │
         ▼
-   PLAN_REPRO(L) → REPRODUCE(D, sandbox) ──fail×N──► NEEDS_HUMAN(H) / stay HYPOTHESIS
+   PLAN_REPRO(L) → REPRODUCE(D, sandbox) ──fail×N──► NEEDS_HUMAN(H) / stay SUSPECTED
         │ oracle pass
         ▼
-   CONFIRMED → ROOT_CAUSE(L + graph) → PATCH(L, worktree) → GATES G1..G6(D)
+   REPRODUCED → ROOT_CAUSE(L + graph) → PATCH(L, worktree) → GATES G1..G6(D)
         │                                   ▲          │ fail (≤k retries, then H)
         │                                   └──────────┘
         ▼ all pass
-   INDEPENDENT_VERIFY(L', different model) → PR_OPEN(D) → HUMAN_MERGE(H) → RETEST(D) → FIXED_VERIFIED
+   INDEPENDENT_VERIFY(L', different model) → PR_OPEN(D) → HUMAN_MERGE(H) → RETEST(D) → VERIFIED
 ```
 
 Rules:
@@ -360,7 +432,7 @@ finding:
   id: QYV-2026-000123
   fingerprint: sha256(cwe + normalized_sink + route_template)     # stable across commits
   cwe: CWE-639
-  state: confirmed      # hypothesis | corroborated | confirmed | fixed_verified | accepted_risk | closed_fp
+  state: reproduced     # suspected | corroborated | reproduced | fixed | verified | accepted_risk | closed_fp
   location: { repo: org/api, commit: 9f2c1e7, file: src/orders/controller.ts, symbol: getOrder, lines: [41, 58] }
   graph_path: ["GET /orders/:id", "authMiddleware", "OrdersController.getOrder", "OrderRepo.findById", "orders(tenant_id)"]
   preconditions: { auth: "any authenticated user", role: "customer", feature_flags: [] }
@@ -444,19 +516,23 @@ Qyverix ingests untrusted code, runs it, attacks live apps, and writes to custom
 
 ## 12. MVP scope and decisions
 
-The three open questions from the research, with recommended answers:
+The thesis is locked as follows:
 
-| Question | Recommendation | Why |
+| Question | Decision | Why |
 |---|---|---|
-| What should it scan? | **Code + dependencies + secrets + APIs, with runtime testing against staging.** IaC/CI comes second. | Exploit proof (§5.01) and authz testing (§5.04) need runtime. Code-only would make us another SAST tool. |
-| Where should it run? | **Hybrid:** scanners, sandboxes and evidence self-hostable in Docker; LLM via a router (hosted API by default, local optional) | Keeps code on-prem where required without forcing customers to own GPUs |
-| How autonomous should remediation be? | **Find → prove → fix → test → verify → open PR automatically; a human approves every merge** | Captures most of the value. R5 shows targeted human checkpoints outperform full autonomy. |
+| First paying customer | **Small and mid-sized B2B SaaS teams** with a multi-tenant application and no dedicated AppSec engineer | Sensitive customer data, frequent change, and an authorization bug can end the business. Value can be shown with a real failing test, not an AI claim. |
+| Technical wedge | **Application-specific security invariants and authorization** | Deterministic oracle, so precision can be near-perfect. Least well served by rule-based tools. It is the base for the graph and verified fixes. |
+| Deployment | **Hybrid:** cloud control plane, isolated workers in the customer's environment, LLM through a router | Source and staging access stay with the customer. No GPU needed. |
+| Objective | **A Qyverix product line first.** YC only after the product is complete and has paying clients (gates in the execution plan). | Your stated direction |
+| Autonomy | Find → prove → fix → verify → open a draft PR automatically; a human approves every merge | R5: targeted human checkpoints beat full autonomy |
+| Scan scope | Code, dependencies, secrets and APIs, with runtime testing in a disposable environment | Proof needs runtime |
 
-**The wedge:** authorization (BOLA/IDOR, tenant isolation) and injection bugs in **TypeScript/Node (Express/NestJS) and Python (FastAPI/Django)** web APIs: found, proven, fixed and re-proven, delivered as GitHub PRs.
+**The wedge:** authorization and tenant-isolation invariants in **TypeScript/JavaScript APIs first (Express, NestJS, Next.js route handlers)**, then Python (FastAPI/Django): declared in the repo, tested on every PR, proven when violated, and fixed with a proof-carrying PR. Injection is the second bug family.
 
 | In MVP | Later |
 |---|---|
-| Express/Nest, FastAPI/Django route + middleware extraction | Java/Spring, Go, .NET, Rails |
+| Express, NestJS, Next.js route + middleware extraction | FastAPI/Django next; then Java/Spring, Go, .NET, Rails |
+| Invariant file, PR gate, change-impact selection | Auto-proposed invariants for payment and workflow state |
 | OpenGrep, Gitleaks, OSV, Trivy (fs) as signals | Container images, Checkov, Zizmor, cloud posture |
 | Security graph v1 | Cross-service / microservice graph |
 | Differential authz harness + injection reproducers | Free-form agentic pentest; Strix integration |
@@ -468,15 +544,15 @@ The three open questions from the research, with recommended answers:
 
 ## 13. Roadmap and milestones
 
-| Phase | Weeks | Deliverables | Exit criterion |
-|---|---|---|---|
-| **0. Evaluation harness** | 1–2 | docker-compose for Juice Shop, crAPI, VAmPI; baseline OpenGrep+Gitleaks+OSV+Trivy+ZAP; held-out real-CVE set frozen | Reproducible baseline report |
-| **1. Intelligence foundation** | 3–6 | Ingestion, tree-sitter indexing, security graph v1, scanner integrations, unified finding schema, fingerprinting, evidence store, GitHub checks | A useful deduped security report on 1 internal repo, with no agents yet |
-| **2. Autonomous investigation** | 6–9 | State machine, model router, budgets, reproducers in a staging sandbox, differential authz harness, memory v1 | Confirmed BOLA findings on crAPI/VAmPI with **zero false Confirmed** |
-| **3. Autonomous remediation** | 9–12 | Root-cause step, patch in worktree, gates G1–G4, independent verifier, PR generation | ≥60% secure repair rate on seeded authz/injection bugs; ≤5% regressions |
-| **4. Differentiated intelligence** | 13–24 | G5/G6, auto rule generation, business-logic workflows (payments, invites, roles), Strix as optional evidence, IaC/CI, cost dashboard, GitLab | Ablations published (§14.3); 2–3 design partners running on staging |
+The schedule lives in [EXECUTION_PLAN.md](./EXECUTION_PLAN.md), so there is one timeline, not two. In outline:
 
-Don't build a polished dashboard before Phase 3 ships. The PR, the check run and the evidence bundle *are* the product until the numbers say otherwise.
+| Stage | Outcome | Gate to the next stage |
+|---|---|---|
+| **1. Build and dogfood** (weeks 1–12) | Invariant gate and proof-carrying fixes for TS/JS, running on Qyverix's own repositories | Held-out numbers meet the §14.2 targets |
+| **2. Design partners → paying clients** (months 4–9) | 3–5 external teams using it on every PR; first paid contracts | Paying clients with retained weekly use |
+| **3. Scale, then YC** | More languages and bug classes; a YC application backed by usage data | — |
+
+Don't build a polished dashboard before stage 2. The PR check, the draft PR and the evidence bundle *are* the product until the numbers say otherwise.
 
 ---
 
@@ -492,6 +568,10 @@ Don't build a polished dashboard before Phase 3 ships. The PR, the check run and
 | AutoPenBench | Autonomous pentest vs the published 21% / 64% | Held out |
 | SecureAgentBench (on code release) | Secure repair vs the published ≤15.2% | Held out |
 | SecLLMHolmes | LLM-layer FP robustness (patched-code, renamed-variable variants) | Held out |
+| VulnGym | Repository-level detection and evidence traces vs published agent results | Held out |
+| JITVul | Paired vulnerable/fixed discrimination: does it still flag the patched version? | Held out |
+| SecRepoBench | Secure completion (C/C++; low relevance to the MVP) | Reference only |
+| **Qyverix-TenantBench** (our own): small multi-tenant SaaS apps in TS/JS with seeded authorization bugs and their fixes | Invariant coverage and authorization detection | Half for development, half frozen |
 | XBOW-style exploitation challenges (⚠️ check availability and license) | Exploitation depth | Held out |
 | **Qyverix-RealFix** (our own): real CVE-fix commits in Node/Python repos; scan the parent commit, compare to the upstream fix | Real-world recall + repair quality | **Frozen, never tuned on** |
 | 2–3 internal Qyverix repos | Real FP rate and developer acceptance | Live |
@@ -502,16 +582,20 @@ Don't build a polished dashboard before Phase 3 ships. The PR, the check run and
 
 | Metric | Definition | Initial target (revisit after Phase 0) |
 |---|---|---|
-| Evidence-backed precision | True positives ÷ Confirmed | ≥95% |
+| Evidence-backed precision | True positives ÷ Reproduced | ≥95% |
 | Recall | Known vulnerabilities found (any state) ÷ total | Beat the scanner-only baseline on the held-out set |
 | Exploit reproducibility | Reproducers that pass on re-run in a fresh env | ≥95% |
 | Root-cause accuracy | Patch location overlaps the upstream fix location | Report |
-| Secure repair rate | Patches passing G1–G4 + verifier ÷ Confirmed | ≥60% (MVP classes) |
+| Secure repair rate | Patches passing G1–G4 + verifier ÷ Reproduced | ≥60% (MVP classes) |
 | Regression rate | Verified patches later failing tests or adding findings | ≤5% |
-| Investigation cost | USD per confirmed finding and per verified fix | Report per model route |
+| Investigation cost | USD per reproduced finding and per verified fix | Report per model route |
 | Time to verified fix | Webhook → PR | Report |
 | Coverage completeness | Files, routes and packages analyzed vs skipped, with reasons | 100% reported (no silent skips) |
+| Authorization coverage | Identity × tenant × route boundaries tested ÷ boundaries in the model | Report; ≥90% on TenantBench |
+| Verification accuracy | Verified findings that are really fixed, on an audited sample | ≥98% |
 | Human acceptance | Fix PRs merged without substantive edits | Report |
+
+**Hard rule:** a scan that times out or runs out of budget reports *incomplete*, never *clean*.
 
 ### 14.3 Ablations (prove the architecture matters)
 
@@ -523,7 +607,7 @@ Don't build a polished dashboard before Phase 3 ships. The PR, the check run and
 
 ### 14.4 Competitor teardown runs
 
-Run Strix, Shannon Lite (evaluation use only), Nephilex and OWASP AppSec Agent on the *same* held-out set with the *same* model budget. Publish the methodology. This replaces the ● / ◐ / ○ guesses in §3.1 with measured numbers.
+The standing baselines for every published comparison are Semgrep/OpenGrep, GitHub agentic autofix and one autonomous pentest agent, on the same repositories and cases, not on different demos. Beyond that, run Strix, Shannon Lite (evaluation use only), Nephilex and OWASP AppSec Agent on the *same* held-out set with the *same* model budget, and trial any §3.3 product that offers access. Publish the methodology. This replaces the ● / ◐ / ○ guesses in §3.1 with measured numbers.
 
 ---
 
@@ -551,8 +635,9 @@ Maintain Qyverix's own SBOM and license inventory in CI from day one.
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| Frontier labs ship repo-level find-and-fix agents | High | Moat = evidence, verification, business-logic depth and per-repo memory, not model access. Stay model-agnostic. |
-| Reproducers are flaky across environments | Medium | Deterministic fixtures, environment snapshots, re-run requirement before Confirmed |
+| Funded startups and GitHub already ship find-and-fix agents (§3.3) | **Already happened** | Don't compete on breadth. Own one customer type and one bug family, with deterministic proof and published held-out numbers. Stay model-agnostic. |
+| The wedge is not an urgent, budgeted problem for SaaS teams | Unknown | 15–20 customer interviews in weeks 1–4 with a kill criterion (execution plan §4) |
+| Reproducers are flaky across environments | Medium | Deterministic fixtures, environment snapshots, re-run requirement before Reproduced |
 | Staging environments are hard for customers to provide | High | Ship a docker-compose "staging from repo" bootstrapper. Fall back to Corroborated state with a clear UI. |
 | LLM cost per investigation is too high | Medium | Scanner-first funnel, routing, caching by commit, per-job budgets |
 | Over-claiming from benchmarks | Medium | Held-out sets only. Publish methodology. (Nephilex lesson.) |
@@ -560,7 +645,7 @@ Maintain Qyverix's own SBOM and license inventory in CI from day one.
 
 **Open questions for the team:**
 1. Who are the 2–3 design partners with Node/Python multi-tenant APIs and a staging environment?
-2. Hosted GitHub App first, or self-host first? (The recommendation is hosted for design partners, keeping the self-host path open.)
+2. Does Qyverix have its own multi-tenant TS/JS application to dogfood on? If not, whose application is the first real target?
 3. Which model families for the fixer vs the verifier? Decide by bake-off in Phase 3, not in advance.
 4. Is Strix integrated as an evidence source, or only benchmarked against? Decide after the §14.4 teardown.
 
@@ -573,6 +658,9 @@ Maintain Qyverix's own SBOM and license inventory in CI from day one.
 - AutoPT — https://arxiv.org/abs/2411.01236 · DOI 10.1109/TIFS.2025.3601343
 - SecureAgentBench — https://arxiv.org/abs/2509.22097
 - AutoPenBench — https://arxiv.org/abs/2410.03225 · ACL Anthology: https://aclanthology.org/2025.emnlp-industry.114/ · code: https://github.com/lucagioacchini/auto-pen-bench
+- VulnGym — https://arxiv.org/abs/2608.02001
+- JITVul — Yildiz et al., ACL 2025 — https://arxiv.org/abs/2503.03586
+- SecRepoBench — https://arxiv.org/abs/2504.21205
 - IEEE Access systematic review (⚠️ numbers unchecked) — DOI 10.1109/ACCESS.2025.3631363
 - Assertion-guided analysis + LLM (⚠️) — https://ieeexplore.ieee.org/abstract/document/11576675
 - From Function to Repository (⚠️) — DOI 10.1109/TSE.2026.3662145
@@ -594,6 +682,15 @@ Maintain Qyverix's own SBOM and license inventory in CI from day one.
 - ZAP — https://github.com/zaproxy/zaproxy
 - DefectDojo — https://github.com/DefectDojo/django-DefectDojo
 - Joern — https://github.com/joernio/joern
+
+**Funded competitors**
+- Corgea — https://ycombinator.com/companies/corgea
+- Gecko Security — https://ycombinator.com/companies/gecko-security
+- Winfunc — https://ycombinator.com/companies/winfunc
+- MindFort — https://www.ycombinator.com/companies/mindfort
+- Tolmo — https://www.ycombinator.com/companies/tolmo
+- ZeroPath — https://zeropath.com
+- GitHub agentic autofix (GA) — https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability
 
 **Curated lists and standards**
 - Awesome-LLM4SVD — https://github.com/hs-esslingen-it-security/Awesome-LLM4SVD
