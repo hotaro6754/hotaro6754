@@ -82,7 +82,7 @@ _DELETED_RE = re.compile(
     r"^(?:This message was deleted|You deleted this message)\.?$", re.I
 )
 _CONTACT_RE = re.compile(r"^(?:Contact card omitted|.*\.vcf\s*\(file attached\))$", re.I)
-_LOCATION_RE = re.compile(r"^(?:live )?location: https?://", re.I)
+_LOCATION_RE = re.compile(r"^(?:(?:live )?location: https?://|live location shared$|live location ended$)", re.I)
 _POLL_RE = re.compile(r"^POLL:", re.I)
 _CALL_RE = re.compile(
     r"^(?:Missed (?:voice|video|group voice|group video) call|(?:Voice|Video) call(?:, .*)?|"
@@ -117,6 +117,8 @@ _SYSTEM_SENDER_HINT = re.compile(
 )
 
 MAX_SENDER_LEN = 80
+# Issue kinds that are expected quirks of WhatsApp exports rather than problems.
+NOTICE_KINDS = frozenset({"out_of_order_timestamp"})
 MAX_STORED_ISSUES_PER_KIND = 200
 DATE_SAMPLE_LIMIT = 50_000
 

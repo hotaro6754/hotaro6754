@@ -88,10 +88,12 @@ def fmt_pct(x: float) -> str:
     return f"{x * 100:.0f}%"
 
 
-def fmt_duration(seconds: float | None) -> str:
+def fmt_duration(seconds: float | None, resolution: int = 1) -> str:
     if seconds is None:
         return "n/a"
     s = float(seconds)
+    if resolution >= 60 and s < 60:
+        return "under 1 min"
     if s < 60:
         return f"{s:.0f} s"
     if s < 3600:
@@ -313,7 +315,8 @@ class _Builder:
                     "people",
                     "writing_style",
                     f"How {name} writes",
-                    f"{name}'s text messages average {p['mean_words']:.1f} words (median {p['median_words']:.0f}). "
+                    f"Half of {name}'s text messages are {p['median_words']:.0f} word(s) or shorter and 90% are "
+                    f"{p['p90_words']:.0f} or shorter (the mean, {p['mean_words']:.1f}, is pulled up by a few long messages). "
                     f"{fmt_pct(q_share)} contain a question mark, {fmt_int(p['media'])} are media and "
                     f"{fmt_int(p['emoji_total'])} emoji were used in total.",
                     "Word counts of text messages; questions are text messages containing '?'; emoji counted by "
@@ -322,7 +325,7 @@ class _Builder:
                     why,
                     metrics={
                         k: p[k]
-                        for k in ("text_messages", "mean_words", "median_words", "questions", "media", "emoji_total", "deleted", "edited")
+                        for k in ("text_messages", "mean_words", "median_words", "p90_words", "questions", "media", "emoji_total", "deleted", "edited")
                     },
                 )
             )
@@ -417,44 +420,60 @@ class _Builder:
                 f.counterexample_note = note
 
         rp = [p for p in self.ppl if p["replies"] >= 5]
+        res = self.a["overview"].get("timestamp_resolution_s", 1)
         if len(rp) >= 2:
-            rp.sort(key=lambda p: (p["reply_median_s"], p["id"]))
+            # Rank by the share of replies sent within five minutes: unlike the
+            # median it stays informative when most replies are near-instant
+            # and timestamps only have minute resolution.
+            rp.sort(key=lambda p: (-(p["reply_within_5min"] / p["replies"]), p["id"]))
             fast, slow = rp[0], rp[-1]
-            n = fast["replies"] + slow["replies"]
-            ratio = (slow["reply_median_s"] or 1) / max(fast["reply_median_s"] or 1, 1)
-            if min(fast["replies"], slow["replies"]) >= 100 and ratio >= 1.5:
-                conf, why = "high", f"Both have ≥ 100 replies and the medians differ by {ratio:.1f}×."
-            elif min(fast["replies"], slow["replies"]) >= 30 and ratio >= 1.25:
-                conf, why = "medium", f"Moderate samples; medians differ by {ratio:.1f}×."
-            else:
-                conf, why = "low", f"Small samples or similar medians ({ratio:.1f}×)."
-            similar = ratio < 1.25
+            k1, n1, k2, n2 = fast["reply_within_5min"], fast["replies"], slow["reply_within_5min"], slow["replies"]
+            z = z_two_proportions(k1, n1, k2, n2)
+            conf, why = confidence_from_z(z, n1 + n2)
+            similar = abs(k1 / n1 - k2 / n2) < 0.05
+            res_note = (
+                " Timestamps in this export have one-minute resolution, so faster replies cannot be told apart."
+                if res >= 60
+                else ""
+            )
             f = self.add(
                 Finding(
                     "F-DY-reply",
                     "dynamics",
                     "reply_time",
-                    "Reply times are similar" if similar else f"{fast['name']} tends to reply faster",
-                    "Median time to reply within a session: "
-                    + ", ".join(f"{p['name']} {fmt_duration(p['reply_median_s'])} (n = {fmt_int(p['replies'])})" for p in rp)
-                    + ".",
+                    "Reply speed is similar" if similar else f"{fast['name']} tends to reply faster",
+                    "Share of replies sent within 5 minutes: "
+                    + ", ".join(f"{p['name']} {fmt_pct(p['reply_within_5min'] / p['replies'])}" for p in rp)
+                    + ". Median reply: "
+                    + ", ".join(f"{p['name']} {fmt_duration(p['reply_median_s'], res)}" for p in rp)
+                    + "; 90th percentile: "
+                    + ", ".join(f"{p['name']} {fmt_duration(p['reply_p90_s'], res)}" for p in rp)
+                    + "."
+                    + res_note,
                     "For every reply (a message following someone else's message in the same session) the gap is "
-                    "measured; medians are robust to occasional very slow replies.",
+                    "measured. People are compared on the share of replies within 5 minutes using a two-proportion "
+                    "z-test; medians and 90th percentiles are shown for context.",
                     conf,
                     why,
-                    metrics={p["name"]: {k: p[k] for k in ("replies", "reply_p25_s", "reply_median_s", "reply_p75_s", "reply_p90_s")} for p in rp},
+                    metrics={
+                        p["name"]: {
+                            k: p[k]
+                            for k in ("replies", "reply_within_5min", "reply_p25_s", "reply_median_s", "reply_p75_s", "reply_p90_s")
+                        }
+                        for p in rp
+                    }
+                    | {"z": round(z, 2), "timestamp_resolution_s": res},
                 )
             )
             mine = self.f.replies.filter(pl.col("responder") == fast["id"])
-            typical = mine.filter(pl.col("reply_s") <= (fast["reply_median_s"] or 0)).sort("ts")
-            f.support(spread(self.ids(typical), 6), f"{fast['name']} replying quickly")
-            threshold = slow["reply_p75_s"] or slow["reply_median_s"] or 0
+            quick = mine.filter(pl.col("reply_s") < 300).sort("ts")
+            f.support(spread(self.ids(quick), 6), f"{fast['name']} replying within 5 minutes")
+            threshold = max(slow["reply_p75_s"] or 0, 300)
             slow_ones = mine.filter(pl.col("reply_s") > threshold).sort("ts")
-            f.counter(spread(self.ids(slow_ones), 5), f"{fast['name']} replying slower than {fmt_duration(threshold)}")
+            f.counter(spread(self.ids(slow_ones), 5), f"{fast['name']} taking longer than {fmt_duration(threshold, res)}")
             f.counterexample_note = (
-                f"{fmt_int(slow_ones.height)} of {fast['name']}'s replies took longer than {fmt_duration(threshold)} "
-                f"(the 75th percentile for {slow['name']}). Reply time also depends on what was asked and when; "
-                "it is not a measure of interest."
+                f"{fmt_int(slow_ones.height)} of {fast['name']}'s replies took longer than {fmt_duration(threshold, res)}. "
+                "Reply time depends on what was asked and when; it is not a measure of interest."
             )
 
     # -- 4. Timeline -----------------------------------------------------------------------
@@ -756,7 +775,11 @@ class _Builder:
     def limitations(self) -> None:
         ov = self.a["overview"]
         audit = self.audit
-        issues = audit.get("issue_counts", {})
+        from openmirror.ingest.whatsapp import NOTICE_KINDS
+
+        all_counts = audit.get("issue_counts", {})
+        issues = {k: v for k, v in all_counts.items() if k not in NOTICE_KINDS}
+        notices = {k: v for k, v in all_counts.items() if k in NOTICE_KINDS}
         total_issues = sum(issues.values())
         parts = [
             f"{fmt_int(audit.get('messages_parsed', 0))} messages were parsed from "
@@ -770,7 +793,13 @@ class _Builder:
                 + ". See the import audit."
             )
         else:
-            parts.append("No import issues were recorded.")
+            parts.append("No import problems were recorded.")
+        if notices.get("out_of_order_timestamp"):
+            parts.append(
+                f"{fmt_int(notices['out_of_order_timestamp'])} message(s) carry a timestamp slightly earlier than the "
+                "message before them. This is normal: WhatsApp lists messages in delivery order. File order is kept "
+                "and negative gaps are treated as zero."
+            )
         if audit.get("date_order_ambiguous"):
             parts.append(
                 f"Day/month order was ambiguous; {audit.get('date_order')} was assumed ({audit.get('date_order_reason')})."
@@ -785,7 +814,7 @@ class _Builder:
                 "Import audit produced by the parser.",
                 "high" if not total_issues and not audit.get("date_order_ambiguous") else "medium",
                 "Every line is accounted for: as a message header, a continuation line, or a recorded issue.",
-                metrics={"issue_counts": issues, "date_order": audit.get("date_order")},
+                metrics={"issue_counts": issues, "notice_counts": notices, "date_order": audit.get("date_order")},
             )
         )
 

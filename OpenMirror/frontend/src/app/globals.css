@@ -1,0 +1,184 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-mark: var(--mark);
+  --color-highlight: var(--highlight);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+}
+
+/* Light: warm paper, ink type, one vermilion mark colour. */
+:root {
+  color-scheme: light;
+  --radius: 0.125rem;
+  --paper: #f7f5f3;
+  --surface: #fcfbfa;
+  --ink: #0d0d0d;
+  --ink-2: #434242;
+  --ink-3: #6e6a69;
+  --rule: #dedcd8;
+  --mark: #bd3c1f;
+  --highlight: #f6e2c9;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: #efedea;
+  --secondary-foreground: var(--ink);
+  --muted: #efedea;
+  --muted-foreground: var(--ink-3);
+  --accent: #efedea;
+  --accent-foreground: var(--ink);
+  --destructive: #b42318;
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--mark);
+
+  /* Validated categorical order (see docs/ARCHITECTURE.md › Charts). */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #6250d6;
+  --series-8: #e34948;
+  --series-other: #a29d92;
+  --seq-0: #efedea;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #6da7ec;
+  --seq-4: #3987e5;
+  --seq-5: #256abf;
+  --seq-6: #184f95;
+  --seq-7: #0d366b;
+}
+
+.dark {
+  color-scheme: dark;
+  --paper: #121110;
+  --surface: #1a1918;
+  --ink: #efece4;
+  --ink-2: #c6c1b5;
+  --ink-3: #928c80;
+  --rule: #2c2a27;
+  --mark: #ef7759;
+  --highlight: #3a2f1c;
+
+  --secondary: #24221f;
+  --muted: #24221f;
+  --accent: #24221f;
+  --destructive: #e5534b;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #0ca30c;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+  --series-other: #6d685f;
+  --seq-0: #24221f;
+  --seq-1: #0d366b;
+  --seq-2: #104281;
+  --seq-3: #184f95;
+  --seq-4: #1c5cab;
+  --seq-5: #2a78d6;
+  --seq-6: #5598e7;
+  --seq-7: #86b6ef;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01";
+  }
+  ::selection {
+    background: var(--highlight);
+  }
+}
+
+@layer components {
+  .kicker {
+    @apply font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3;
+  }
+  .prose-report p {
+    @apply font-serif text-[1.18rem] leading-[1.7] text-ink;
+    font-variation-settings: "opsz" 16;
+  }
+  .prose-report p + p {
+    @apply mt-4;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Heavy, tightly tracked grotesk for headlines and numerals. */
+  .display {
+    font-family: var(--font-sans);
+    font-weight: 680;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+  .pill {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-6 text-[15px] font-semibold text-paper transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mark disabled:opacity-40;
+  }
+  .pill-ghost {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-secondary px-6 text-[15px] font-semibold text-ink transition-colors hover:bg-rule focus-visible:outline-2 focus-visible:outline-mark;
+  }
+}
+
+/* Hero fragments drift gently; motion is disabled for users who prefer less. */
+@keyframes om-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.om-float {
+  animation: om-float 9s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .om-float { animation: none; }
+}

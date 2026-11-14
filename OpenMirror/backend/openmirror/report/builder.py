@@ -108,7 +108,9 @@ def _paragraphs(a: dict, people: list[dict], by: dict[str, list[Finding]]) -> di
     ppl = []
     for p in people[:8]:
         bits = [
-            f"{p['name']} sent {fmt_int(p['messages'])} messages, typically {p['median_words']:.0f} words long",
+            f"{p['name']} sent {fmt_int(p['messages'])} messages, typically {p['median_words']:.0f} word"
+            + ("" if p["median_words"] == 1 else "s")
+            + " long",
             f"most often around {p['peak_hour']:02d}:00",
         ]
         if p["messages_per_turn"] >= 1.3:
@@ -130,7 +132,11 @@ def _paragraphs(a: dict, people: list[dict], by: dict[str, list[Finding]]) -> di
         if rp:
             dyn.append(
                 "Typical (median) reply times within a session: "
-                + "; ".join(f"{p['name']} {fmt_duration(p['reply_median_s'])}" for p in rp)
+                + "; ".join(
+                    f"{p['name']} {fmt_duration(p['reply_median_s'], ov.get('timestamp_resolution_s', 1))}"
+                    f" ({fmt_pct(p['reply_within_5min'] / p['replies'])} within 5 min)"
+                    for p in rp
+                )
                 + ". Slow replies are normal in any chat and are not, on their own, a sign of disinterest."
             )
     out["dynamics"] = dyn

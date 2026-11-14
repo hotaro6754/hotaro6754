@@ -19,3 +19,4 @@ frontend/*.tsbuildinfo
 *.sqlite3
 *.sqlite3-*
 private/
+frontend/.next-e2e/

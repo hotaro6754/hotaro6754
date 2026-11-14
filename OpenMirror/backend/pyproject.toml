@@ -2,7 +2,7 @@
 name = "openmirror"
 version = "0.1.0"
 description = "Private, local-first conversation intelligence for WhatsApp exports."
-readme = "../README.md"
+readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [

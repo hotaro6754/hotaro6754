@@ -180,7 +180,12 @@ def compute(frames: Frames, params: AnalysisParams) -> dict:
     monthly_total = pm.group_by(pl.col("ts").dt.truncate("1mo").alias("month")).agg(n=pl.len()).sort("month")
     busiest_month = monthly_total.sort(["n", "month"], descending=[True, False]).row(0, named=True)
 
+    # Android exports record minutes only; iOS records seconds. Reply times
+    # shorter than the resolution cannot be distinguished.
+    resolution_s = 60 if int((pm["ts"].dt.second() != 0).sum()) == 0 else 1
+
     out["overview"] = {
+        "timestamp_resolution_s": resolution_s,
         "total_messages": df.height,
         "participant_messages": pm.height,
         "system_messages": by_type.get("system", 0),
@@ -237,6 +242,7 @@ def compute(frames: Frames, params: AnalysisParams) -> dict:
                 "words": int(sum(words)),
                 "mean_words": (sum(words) / len(words)) if words else 0,
                 "median_words": _q(words, 0.5) or 0,
+                "p90_words": _q(words, 0.9) or 0,
                 "media": int((mine["message_type"] == "media").sum()),
                 "deleted": int((mine["message_type"] == "deleted").sum()),
                 "edited": int(mine["is_edited"].sum()),
@@ -258,6 +264,8 @@ def compute(frames: Frames, params: AnalysisParams) -> dict:
                 "reply_p25_s": _q(rs, 0.25),
                 "reply_p75_s": _q(rs, 0.75),
                 "reply_p90_s": _q(rs, 0.9),
+                "reply_within_resolution": sum(1 for x in rs if x < resolution_s),
+                "reply_within_5min": sum(1 for x in rs if x < 300),
                 "longest_message_id": longest["id"][0] if longest.height else None,
                 "longest_message_words": longest["words"][0] if longest.height else 0,
                 "first_message_id": mine["id"][0],
