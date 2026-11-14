@@ -1,0 +1,21 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts
+frontend/test-results/
+frontend/playwright-report/
+frontend/*.tsbuildinfo
+
+# Local data — never commit real conversations
+.openmirror/
+*.sqlite3
+*.sqlite3-*
+private/
